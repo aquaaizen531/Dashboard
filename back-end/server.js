@@ -8,7 +8,6 @@ require("dotenv").config();
 const userRoutes = require("./routes/user.routes");
 const botRoutes = require("./routes/getBots.routes");
 const userModel = require("./model/user.model");
-const bcrypt = require("bcrypt");
 const { botsocket } = require("./controller/bot.controller");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -50,7 +49,6 @@ const io = new Server(server, {
 
 io.on("connection", async (socket) => {
   try {
-    console.log("first");
     const cookies = cookie.parse(socket.request.headers.cookie || "");
     const token = cookies.authToken;
 
@@ -78,6 +76,4 @@ server.listen(process.env.PORT, (err) => {
   console.log("server is running");
 });
 
-// app.listen(process.env.PORT, (err) => {
-//   console.log("server is running");
-// });
+

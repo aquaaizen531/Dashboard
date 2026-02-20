@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Map,
   Users,
   BarChart3,
-  ClipboardList,
   Compass,
+  NotebookPen,
+  HomeIcon,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import "../css/sidebar.css";
@@ -18,6 +19,12 @@ export default function Sidebar({ role = "admin" }) {
   const menuItems = [
     {
       path: "/",
+      label: "Dashboard",
+      icon: HomeIcon,
+      roles: ["admin", "analyst", "user"],
+    },
+    {
+      path: "/overview",
       label: "Overview",
       icon: LayoutDashboard,
       roles: ["admin", "analyst", "user"],
@@ -43,16 +50,31 @@ export default function Sidebar({ role = "admin" }) {
     {
       path: "/userlog",
       label: "User Logs",
-      icon: ClipboardList,
+      icon: NotebookPen,
       roles: ["admin", "analyst"],
     },
   ];
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkScreen = () => {
+      const mobile = window.innerWidth < 645;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsCollapsed(true);
+      } else {
+        setIsCollapsed(false);
+      }
+    };
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
   return (
     <div
       className={cn(
         "relative flex flex-col h-screen transition-all duration-300 border-r",
-        isCollapsed ? "w-[70px]" : "w-[250px]",
+        isCollapsed ? "w-[70px]" : isMobile ? "w-[200px]" : "w-[250px]",
       )}
       style={{
         backgroundColor: "var(--primary-bg-color)",

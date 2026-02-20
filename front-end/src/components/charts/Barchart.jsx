@@ -1,6 +1,4 @@
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
+import React, { useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -9,18 +7,14 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
 } from "recharts";
 import { useBotData } from "../../context/BotContext";
 
 const Barchart = () => {
-  const [wasteData, setwasteData] = useState([]);
-  const { botData, setbotData } = useBotData();
-  useEffect(() => {
-    if (!botData) {
-      // console.log("BotData is not Ready yet:");
-      return;
-    }
+  const { botData } = useBotData();
+  const wasteData = useMemo(() => {
+    if (!botData) return [];
     const formatedData = botData.flatMap((bot) =>
       bot.data.map((data) => ({
         name: bot.name,
@@ -28,13 +22,11 @@ const Barchart = () => {
           data.Wastetraystatus === "Half"
             ? 50
             : data.Wastetraystatus === "Full"
-            ? 100
-            : 0
-      }))
+              ? 100
+              : 0,
+      })),
     );
-    // console.log(formatedData);
-    setwasteData(formatedData);
-    // console.log(wasteData)
+    return formatedData;
   }, [botData]);
 
   return (
@@ -45,9 +37,7 @@ const Barchart = () => {
         data={wasteData}
         margin={{ right: 30, top: 20, bottom: 20 }}
       >
-        <YAxis
-          label={{ value: "Waste Tray %", angle: -90, dx: -10 }}
-        />
+        <YAxis label={{ value: "Waste Tray %", angle: -90, dx: -10 }} />
         <XAxis dataKey="name" />
         <CartesianGrid strokeDasharray="5 5" />
         <Tooltip />

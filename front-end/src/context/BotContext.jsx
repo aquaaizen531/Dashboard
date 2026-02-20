@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState, useContext } from "react";
 import axios from "../config/axios.config";
 import socket from "../config/socket";
 
-const botContext = createContext();
+const BotContext = createContext();
 export const BotProvider = ({ children }) => {
-  const [botData, setbotData] = useState(null);
-  const [botHistory, setbotHistory] = useState(null);
+  const [botData, setbotData] = useState([]);
+  const [botHistory, setbotHistory] = useState([]);
+  const [dashboardStats, setdashboardStats] = useState(null);
   useEffect(() => {
     const verifyUser = async () => {
       try {
@@ -20,31 +21,37 @@ export const BotProvider = ({ children }) => {
     verifyUser();
   }, []);
   useEffect(() => {
-    socket.on("botData", (data) => {
-      // console.log("bot Data:", data);
-      setbotData(data.botData);
-      setbotHistory(data.botHistory);
-      if (botData) console.log(botData);
+    socket.on("connect", () => {
+      socket.emit("initDashboard");
     });
-    socket.emit("getBots");
-
+    socket.on("botData", (data) => {
+      setbotData(data);
+    });
+    socket.on("todaysData", (todayHistory) => {
+      setbotHistory(todayHistory);
+    });
+    socket.on("dashboardStats", (data) => {
+      setdashboardStats(data);
+    });
     return () => {
       socket.off("botData");
+      socket.off("todaysData");
+      socket.off("dashboardStats");
     };
   }, []);
-  // const getBots = () => {
-  //   axios.get("/getbots").then((res) => {
-  //     console.log(res);
-  //     setbotData(res.data.bots);
-  //   });
-  // };
-  // useEffect(() => {
-  //   getBots();
-  // }, []);
   return (
-    <botContext.Provider value={{ botData, setbotData, botHistory }}>
+    <BotContext.Provider
+      value={{
+        botData,
+        setbotData,
+        botHistory,
+        setbotHistory,
+        dashboardStats,
+        setdashboardStats,
+      }}
+    >
       {children}
-    </botContext.Provider>
+    </BotContext.Provider>
   );
 };
-export const useBotData = () => useContext(botContext);
+export const useBotData = () => useContext(BotContext);

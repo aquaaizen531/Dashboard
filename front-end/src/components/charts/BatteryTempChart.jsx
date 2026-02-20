@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -7,33 +7,27 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
 } from "recharts";
 import { useBotData } from "../../context/BotContext";
 
 const BatteryTempChart = () => {
-  const [data, setdata] = useState([]);
-  const { botData, setbotData } = useBotData();
-  // console.log(botData);
-  useEffect(() => {
-    if (!botData) {
-      // console.log("botData is not ready yet:", botData);
-      return;
-    }
+  const { botData } = useBotData();
+  const data = useMemo(() => {
+    if (!botData) return [];
     const formatedData = botData.flatMap((bot) =>
       bot.data.map((entry) => ({
         time: new Date(entry.date).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-          hour12: true
+          hour12: true,
         }),
         battery: Math.floor(entry.Battery),
         humidity: parseFloat(entry.humidity),
-        temperature: entry.temp
-      }))
+        temperature: entry.temp,
+      })),
     );
-    // console.log(formatedData);
-    setdata(formatedData);
+    return formatedData;
   }, [botData]);
   return (
     <div className="flex-1">

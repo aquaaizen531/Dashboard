@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "../../config/axios.config";
 import "../../css/map.css";
 import { ImLocation } from "react-icons/im";
 import { divIcon } from "leaflet";
@@ -10,26 +9,40 @@ import {
   Marker,
   Popup,
   TileLayer,
-  useMap
+  useMap,
 } from "react-leaflet";
-// import "../../css/dropdown.css";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { RiArrowDownWideLine } from "react-icons/ri";
 import { useBotData } from "../../context/BotContext";
+import { Activity, BatteryCharging, Bot, IdCard, MapPinned, MonitorCog, Timer, Trash2, Wrench } from "lucide-react";
+import StatCard from "../stat-card";
+import RuntimeCard from "../Run-time-Card";
+import TempHumidityCard from "../Temp-Hum-card";
 
 const Map = () => {
   const iconMarkup = ReactDOMServer.renderToString(
-    <ImLocation size={30} color="#7393b3  " />
+    <ImLocation size={30} color="#7393b3  " />,
   );
   const customIcon = divIcon({
     html: iconMarkup,
     className: "",
     iconSize: [30, 30],
-    iconAnchor: [15, 30]
+    iconAnchor: [15, 30],
   });
   const [bots, setbots] = useState([]);
   const { botData } = useBotData();
+  useEffect(() => {
+    setbots(botData);
+  }, [botData]);
   const [zoomTo, setzoomTo] = useState(null);
   const [selectedPin, setselectedPin] = useState(null);
+  const statsRef = useRef(null);
   const ZoomToMarker = ({ position, z }) => {
     const map = useMap();
     useEffect(() => {
@@ -39,7 +52,7 @@ const Map = () => {
       map.flyTo(position, z, {
         animate: true,
         duration: 3,
-        easeLinearity: 0.25
+        easeLinearity: 0.25,
       });
     }, [position, map]);
     return null;
@@ -57,187 +70,55 @@ const Map = () => {
       map.flyTo(center, 11, {
         animate: true,
         duration: 3,
-        easeLinearity: 0.25
+        easeLinearity: 0.25,
       });
     }, [city, map]);
     return null;
   });
-  useEffect(() => {
-    // axios.get("/getbots").then((res) => {
-    //   console.log(res);
-    //   setbots(res.data.bots);
-    // });
-    setbots(botData);
-  }, [botData]);
-  const locationRef = useRef(null);
-  // const operatorRef = useRef(null);
-  const [isLctnDrpDwnOpen, setisLctnDropDownOpen] = useState(false);
-  // const [isOprtrDrpDwnOpen, setisOprtrDrpDwnOpen] = useState(false);
-  const toggleLctnDrpDwn = () => {
-    setisLctnDropDownOpen(!isLctnDrpDwnOpen);
-  };
-  // const toggleOprtrDrpDwn = () => {
-  //   setisOprtrDrpDwnOpen(!isOprtrDrpDwnOpen);
-  // };
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (locationRef.current && !locationRef.current.contains(event.target)) {
-        setisLctnDropDownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, []);
-  // useEffect(() => {
-  //   const handleOutsideClick = (event) => {
-  //     if (operatorRef.current && !operatorRef.current.contains(event.target)) {
-  //       setisOprtrDrpDwnOpen(false);
-  //     }
-  //   };
-  //   document.addEventListener("mousedown", handleOutsideClick);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleOutsideClick);
-  //   };
-  // }, []);
-  const uniqueCities = [
-    "All",
-      "Chennai","Kochi"
-  ];
-  // const uniqueOprtr = [
-  //   "All",
-  //   ...new Set(bots.map((bot) => bot.data[0].operator.name))
-  // ];
+
+  const uniqueCities = ["All", "Chennai", "Kochi"];
   const [selectedCity, setselectedCity] = useState("All");
-  const [slctdCityTitle, setslctdCityTitle] = useState("All");
-  // const [selectedOprtr, setselectedOprtr] = useState("");
   const [filteredBots, setfilteredBots] = useState([]);
-  const [filtervalues, setfiltervalues] = useState({
-    selectedCity: ""
-    // selectedOprtr
-  });
+  const [filtervalue, setfiltervalue] = useState("All");
   const handleApplyBtn = () => {
-    setselectedCity(filtervalues.selectedCity);
-    // setselectedOprtr(filtervalues.selectedOprtr);
+    setselectedCity(filtervalue);
   };
   useEffect(() => {
     const handleFilteredBots = () => {
       let filtered = bots;
       if (selectedCity && selectedCity !== "All") {
         filtered = filtered.filter(
-          (bot) => bot.data[0].position.city === selectedCity.toLowerCase()
+          (bot) => bot.data[0].position.city === selectedCity.toLowerCase(),
         );
       }
-      // if (selectedOprtr && selectedOprtr !== "All") {
-      //   filtered = filtered.filter(
-      //     (bot) => bot.data[0].operator.name === selectedOprtr
-      //   );
-      // }
       setfilteredBots(filtered);
     };
     handleFilteredBots();
-  }, [
-    bots,
-    selectedCity
-    // , selectedOprtr
-  ]);
+  }, [bots, selectedCity]);
   useEffect(() => {
     setzoomTo(null);
     setselectedPin(null);
-  }, [
-    selectedCity
-    // , selectedOprtr
-  ]);
-  console.log(selectedPin);
+  }, [selectedCity]);
+  console.log(selectedPin)
   return (
     <div className="m-2 flex flex-1 flex-col ">
       <div className="flex mb-1 gap-1">
         {/* city dropdown */}
-        <div className="relative w-[130px]" ref={locationRef}>
-          <div className="dropdown " onClick={toggleLctnDrpDwn}>
-            <p>
-              {slctdCityTitle.length > 0
-                ? slctdCityTitle === "All"
-                  ? "City"
-                  : slctdCityTitle
-                : "City"}
-            </p>
-            <span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-[130px] justify-between">
+              {selectedCity === "All" ? "City" : selectedCity}
               <RiArrowDownWideLine />
-            </span>
-          </div>
-          {isLctnDrpDwnOpen && (
-            <div
-              className="relative"
-              
-            >
-              <div className="options-div-map !bg-white dropdown-glass">
-                <ul className="dropdown-ul">
-                  {uniqueCities.map((city, idx) => (
-                    <li
-                      key={idx}
-                      className="dropdown-li"
-                      onClick={() => {
-                        setfiltervalues({
-                          ...filtervalues,
-                          selectedCity: city
-                        });
-                        setisLctnDropDownOpen(!isLctnDrpDwnOpen);
-                        setslctdCityTitle(city);
-                      }}
-                    >
-                      {city}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
-        {/* operator dropdown */}
-        {/* <div className="relative w-[130px]" ref={operatorRef}>
-          <div className="dropdown overflow-x-hidden" onClick={toggleOprtrDrpDwn}>
-            <p>
-              {selectedOprtr.length > 0
-                ? selectedOprtr === "All"
-                  ? "Operator"
-                  : selectedOprtr
-                : "Operator"}
-            </p>
-            <span>
-              <RiArrowDownWideLine />
-            </span>
-          </div>
-          {isOprtrDrpDwnOpen && (
-            <div
-              className="relative "
-              style={{
-                background: "radial-gradient(circle at top, #3a6db0, #1b1b1b)"
-              }}
-            >
-              <div className="options-div-map dropdown-glass">
-                <ul className="dropdown-ul">
-                  {uniqueOprtr.map((operator, idx) => (
-                    <li
-                      key={idx}
-                      className="dropdown-li"
-                      onClick={() => {
-                        setfiltervalues({
-                          ...filtervalues,
-                          selectedOprtr: operator
-                        });
-                        setisOprtrDrpDwnOpen(!isOprtrDrpDwnOpen);
-                      }}
-                    >
-                      {operator}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </div> */}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[130px] p-1">
+            {uniqueCities.map((city, idx) => (
+              <DropdownMenuItem key={idx} onClick={() => setfiltervalue(city)}>
+                {city}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <button onClick={handleApplyBtn} className="apply-btn">
           Apply
         </button>
@@ -276,14 +157,19 @@ const Map = () => {
                   click: () => {
                     setzoomTo([
                       bot.data[0].position.lat,
-                      bot.data[0].position.lng
+                      bot.data[0].position.lng,
                     ]);
                     setselectedPin(bot);
+                    setTimeout(() => {
+                      statsRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                      });
+                    }, 100);
                   },
                   popupclose: () => {
                     setselectedPin(null);
                     setzoomTo(null);
-                  }
+                  },
                 }}
               >
                 <Popup>{bot.name}</Popup>
@@ -293,80 +179,73 @@ const Map = () => {
             {zoomTo && <ZoomToMarker position={zoomTo} z={16} />}
           </MapContainer>
         </div>
-        {selectedPin ? (
-          <div className="flex flex-col gap-1 lg:w-[300px] overflow-y-auto pb-2">
-            <div className="d-card bg-amber-300 col-span-4 pl-[10px] pt-[2px] h-[30px]">
-              Id: {selectedPin.UniqueCode}
-            </div>
-            <div className="d-card bg-amber-300 col-span-4 pl-[10px] pt-[2px] h-[30px]">
-              Operator: {selectedPin.data[0].operator}
-            </div>
-            <div className="d-card bg-amber-200 pl-[10px] pt-[10px] h-[50px]">
-              Uptime: {selectedPin.data[0].Robotuptime}
-            </div>
-            <div className="d-card bg-amber-200 pl-[10px] pt-[10px] h-[50px]">
-              Battery: {Math.floor(selectedPin.data[0].Battery)}%
-            </div>
-            <div className="d-card bg-amber-200 pl-[10px] pt-[10px] h-[50px]">
-              Didtance Covered:{" "}
-              {Math.round(selectedPin.data[0].DistanceCovered)} KM
-            </div>
-            <div className="d-card bg-amber-200 pl-[10px] pt-[10px] h-[50px]">
-              Wastetraystatus: {selectedPin.data[0].Wastetraystatus}
-            </div>
-            <div className="col-span-4 flex gap-1">
-              <div className=" bg-white rounded-sm overflow-hidden flex-1">
-                <table className="tbl">
-                  <thead className="tblhead h-[25px]">
-                    <tr className="tblhdng">
-                      <th className="pl-5">Date</th>
-                      {/* <th>User Name</th> */}
-                      <th>Run Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedPin.operators.map((operator, idx) => (
-                      <tr key={idx}>
-                        <td className="pl-5">
-                          {new Date(operator.date).toLocaleString("en-US", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true
-                          })}
-                        </td>
-                        {/* <td>{operator.user.name}</td> */}
-                        <td className="">{operator.runtime}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {/* <div className=" bg-white w-[100px] flex-1 overflow-hidden !rounded-sm">
-                <table className="tbl rounded-2xl ">
-                  <thead className="tblhead h-[25px]">
-                    <tr className="tblhdng">
-                      <th className="pl-5">Runtime</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedPin.operators.map((operator, idx) => (
-                      <tr key={idx}>
-                        <td className="pl-5">{operator.runtime}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div> */}
-            </div>
-          </div>
-        ) : (
-          // <div className="d-card bg-amber-300 col-span-4 pl-[10px] pt-[2px] h-[30px]"></div>
-          <></>
-        )}
       </div>
+      {selectedPin && (
+        <div ref={statsRef} className="grid gap-4 m-2 lg:grid-cols-4">
+          <StatCard
+            title="Id"
+            value={selectedPin?.UniqueCode || "__"}
+            icon={IdCard}
+            iconColor="text-blue-600"
+            iconBg="bg-blue-50"
+          />
+          <StatCard
+            title="Bot Name"
+            value={selectedPin?.name || "__"}
+            icon={Bot}
+            iconColor="text-blue-600"
+            iconBg="bg-purple-50"
+          />
+          <StatCard
+            title="Status"
+            value={selectedPin?.data[0]?.Status || "__"}
+            icon={Activity}
+            iconColor="text-blue-600"
+            iconBg="bg-blue-50"
+          />
+          <StatCard
+            title="Operator"
+            value={selectedPin?.data[0].operator.name || "__"}
+            icon={Wrench}
+            iconColor="text-blue-600"
+            iconBg="bg-purple-50"
+          />
+          <StatCard
+            title="Robot Uptime"
+            value={selectedPin.data[0].Robotuptime || "__"}
+            icon={Timer}
+            iconColor="text-blue-600"
+            iconBg="bg-blue-50"
+          />
+          <StatCard
+            title="Battery Level"
+            value={`${Math.floor(selectedPin.data[0].Battery) || "__"}%`}
+            icon={BatteryCharging}
+            iconColor="text-blue-600"
+            iconBg="bg-purple-50"
+          />
+          <StatCard
+            title="Distance Covered"
+            value={`${Math.round(selectedPin.data[0].DistanceCovered)} KM`}
+            icon={MapPinned}
+            iconColor="text-blue-600"
+            iconBg="bg-purple-50"
+          />
+          <StatCard
+            title="Waste Tray Status"
+            value={selectedPin.data[0].Wastetraystatus}
+            icon={Trash2}
+            iconColor="text-blue-600"
+            iconBg="bg-purple-50"
+          />
+          <div className="col-span-2">
+            <RuntimeCard operators={selectedPin.operators} />
+          </div>
+          <div className="col-span-2">
+            <TempHumidityCard data={selectedPin.data} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

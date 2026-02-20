@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Login from "./pages/Login";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -10,17 +10,16 @@ import UserLogs from "./components/admin/UserLogs";
 import UserManagement from "./components/admin/UserManagement";
 import Analysis from "./components/admin/Analysis";
 import Profile from "./components/Profile";
-import { useTheme } from "./context/ThemeProvider";
 import { BotProvider } from "./context/BotContext";
 import { useUserDetails } from "./context/UserContext";
 import AutoLogout from "./config/AutoLogout";
 import ThemeApplier from "./context/ThemeApplier";
 import { Toaster } from "@/components/ui/sonner";
 import { Spinner } from "@/components/ui/spinner";
+import Dashboard from "./components/Dashboard";
 
 const App = () => {
   const { userDetails } = useUserDetails();
-  const { isDark } = useTheme();
   const role = userDetails?.role;
   const location = useLocation();
   const isLoginpage = location.pathname === "/login";
@@ -46,7 +45,8 @@ const App = () => {
                           role === "admin" ||
                           role === "analyst") && (
                           <>
-                            <Route index element={<Overview />} />
+                            <Route index element={<Dashboard />} />
+                            <Route path="overview" element={<Overview />} />
                             <Route path="livemap" element={<Map />} />
                           </>
                         )}

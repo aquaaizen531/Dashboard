@@ -44,15 +44,17 @@ export default function Header({ activeSection }) {
   };
 
   const { isDark, setisDark } = useTheme();
-  const handleTheme = (e) => {
+  const handleTheme = () => {
     setisDark(!isDark);
   };
   return (
     <div
       className=""
-      style={{ borderBottom: "1px solid #e6e6e6", background: "#fff" }}
+      style={{
+        background: "var(--primary-bg-color)",
+      }}
     >
-      <div className="" style={{ padding: "12px 16px" }}>
+      <div className="" style={{ padding: "10px 15px" }}>
         <nav
           style={{
             display: "flex",
@@ -60,7 +62,7 @@ export default function Header({ activeSection }) {
             justifyContent: "space-between",
           }}
         >
-          <span className=" text-[var(--text-color)] text-lg md:text-xl font-bold ml-16">
+          <span className=" text-[var(--primary-text-color)] text-lg md:text-xl font-bold ml-16">
             {activeSection}
           </span>
           {/* Right: controls */}
@@ -74,39 +76,6 @@ export default function Header({ activeSection }) {
               padding: 0,
             }}
           >
-            {/* Search */}
-            {/* <li>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  background: "#f3f4f6",
-                  padding: "6px 10px",
-                  borderRadius: 8,
-                  minWidth: 220,
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder="Search here..."
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    fontSize: 14,
-                    color: "#111827",
-                  }}
-                />
-                <span style={{ marginLeft: 8, color: "#6b7280", display: "flex", alignItems: "center" }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="#6b7280" strokeWidth="1.5"></path>
-                    <path d="M21 21l-4.35-4.35" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round"></path>
-                  </svg>
-                </span>
-              </div>
-            </li> */}
-
             <button
               type="button"
               style={{

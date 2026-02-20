@@ -8,7 +8,6 @@ const crypto = require("crypto");
 module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    // console.log(req.body);
     const user = await userModel.findOne({ email: email });
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
@@ -91,9 +90,7 @@ module.exports.presence = async (req, res) => {
 };
 module.exports.getUsers = async (req, res) => {
   try {
-    // console.log("object");
     const users = await userModel.find().select("-password");
-    // console.log(users);
     if (users.length === 0) {
       res.status(401).json({ message: "couldn't find any users" });
     } else {
@@ -107,7 +104,6 @@ module.exports.getUsers = async (req, res) => {
             : false
         };
       });
-      console.log(udata);
       res.status(200).json({ message: "users found", data: udata });
     }
   } catch (error) {
@@ -117,16 +113,13 @@ module.exports.getUsers = async (req, res) => {
 module.exports.adduser = async (req, res) => {
   try {
     const nuser = req.body;
-    // console.log("nuser");
     const existingUser = await userModel.findOne({ email: nuser.email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists!" });
     }
     const plainPassword = crypto.randomBytes(5).toString("hex");
     nuser.password = plainPassword;
-    // console.log(nuser);
     const newUser = await userModel.create(nuser);
-    // console.log("newUser");
     await passmodel.create({ user: newUser._id, pass: plainPassword });
     const allUsers = await userModel.find().select("-password");
     const { password, ...userWithoutPass } = newUser.toObject();
@@ -184,7 +177,6 @@ module.exports.edituser = async (req, res) => {
       role: data.role,
       activityStatus: data.activityStatus
     };
-    // console.log(edits.password)
     const existingUser = await userModel.findById(id);
     let plainPassword = "";
     if (data.password && data.password.trim() !== "") {
@@ -194,7 +186,6 @@ module.exports.edituser = async (req, res) => {
     } else {
       delete edits.password;
     }
-    // console.log(edits.password)
     const changedFields = {};
     const logDetails = Object.entries(changedFields)
       .map(([key, { from, to }]) => `${key}:"${from}"→"${to}" `)
@@ -254,7 +245,6 @@ module.exports.profileupdate = async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
-    // console.log(id, data);
     const update = {
       name: data.name,
       email: data.email,
@@ -377,7 +367,6 @@ module.exports.getpass = async (req, res) => {
       res.status(401).json({ message: "UnAuthorised" });
     } else {
       const pass = await passmodel.find().populate().select("-password");
-      // console.log(pass);
       res.status(200).json({ message: "success", data: pass });
     }
   } catch (error) {

@@ -19,7 +19,7 @@ const Login = () => {
   const navigate = useNavigate();
   const validate = (value) => {
     const errs = {};
-    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
     if (!value.email) {
       errs.email = "This Feild can't be empty!";
     } else if (!emailRegex.test(value.email)) {
@@ -39,49 +39,47 @@ const Login = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const ldng = toast.loading("Loading");
-    try {
-      setsubmitted(true);
-      const errors = validate(formvalue);
-      if (Object.keys(errors).length === 0) {
-        seterr({});
-      } else {
-        seterr(errors);
-        return;
-      }
-      await axios
-        .post("/login", formvalue, { withCredentials: true })
-        .then((res) => {
-          toast.update(ldng, {
-            render: "welcome",
-            type: "success",
-            isLoading: false,
-            autoClose: 1500,
-          });
-          console.log(res);
-          localStorage.setItem("userId", res.data.user.id);
-          setuserDetails(res.data.user);
-          navigate("/");
-        })
-        .catch((error) => {
-          toast.update(ldng, {
-            render: error.response.data.message,
+    setsubmitted(true);
+    const errors = validate(formvalue);
+    if (Object.keys(errors).length > 0) {
+      seterr(errors);
+      setsubmitted(false);
+      toast.error("Please fill the form correctly!");
+      return;
+    }
+    seterr({});
+    const toastId = toast.loading("Signing in...");
+    await axios
+      .post("/login", formvalue, { withCredentials: true })
+      .then((res) => {
+        toast.update(toastId, {
+          render: "welcome",
+          type: "success",
+          isLoading: false,
+          autoClose: 1500,
+        });
+        localStorage.setItem("userId", res.data.user.id);
+        setuserDetails(res.data.user);
+        navigate("/");
+      })
+      .catch((error) => {
+        if (error.response) {
+          toast.update(toastId, {
+            render: error.response.data.message || "Something went wrong!",
             type: "error",
             isLoading: false,
             autoClose: 1000,
           });
-          setsubmitted(false);
-        });
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-      toast.update(ldng, {
-        render: error.message || error,
-        type: "error",
-        isLoading: false,
+        } else {
+          toast.update(toastId, {
+            render: "Something went wrong!",
+            type: "error",
+            isLoading: false,
+            autoClose: 1000,
+          });
+        }
+        setsubmitted(false);
       });
-      setsubmitted(false);
-    }
   };
   return (
     <div>

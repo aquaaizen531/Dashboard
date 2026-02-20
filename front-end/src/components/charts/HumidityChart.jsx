@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -8,36 +7,30 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
 } from "recharts";
 import { useBotData } from "../../context/BotContext";
-import { useEffect } from "react";
 
 const HumidityChart = () => {
   const { botData } = useBotData();
-  const [humidityData, sethumidityData] = useState([]);
-  useEffect(() => {
-    if (!botData) {
-      // console.log("BotData is not Ready yet:");
-      return;
-    }
+  const humidityData = useMemo(() => {
+    if (!botData) return [];
     const formatedData = botData.flatMap((bot) =>
       bot.data.map((data) => ({
         time: new Date(data.date).toLocaleTimeString([], {
           hour12: true,
           hour: "2-digit",
-          minute: "2-digit"
+          minute: "2-digit",
         }),
-        humidity: data.humidity
-      }))
+        humidity: data.humidity,
+      })),
     );
-    // console.log(formatedData);
-    sethumidityData(formatedData);
+    return formatedData;
   }, [botData]);
 
   return (
     <div>
-      <ResponsiveContainer  width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={humidityData}
           // width={300}

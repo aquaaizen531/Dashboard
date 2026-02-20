@@ -1,14 +1,4 @@
-/* Sidebar.css - hover & active styles to match original HTML sidebar */
 
-/* base variables fallback (optional) */
-/* :root {
-  --primary-bg-color: #111827;
-  --primary-text-color: #e6edf3;
-  --secondary-bg-color: rgba(255,255,255,0.06);
-  --secondary-text-color: rgba(230,237,243,0.7);
-} */
-
-/* Ensure list resets */
 .metismenu {
   list-style: none;
   margin: 0;
