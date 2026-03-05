@@ -20,7 +20,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { RiArrowDownWideLine } from "react-icons/ri";
 import { useBotData } from "../../context/BotContext";
-import { Activity, BatteryCharging, Bot, IdCard, MapPinned, MonitorCog, Timer, Trash2, Wrench } from "lucide-react";
+import {
+  Activity,
+  BatteryCharging,
+  Bot,
+  IdCard,
+  MapPinned,
+  MonitorCog,
+  Timer,
+  Trash2,
+  Wrench,
+} from "lucide-react";
 import StatCard from "../stat-card";
 import RuntimeCard from "../Run-time-Card";
 import TempHumidityCard from "../Temp-Hum-card";
@@ -88,7 +98,9 @@ const Map = () => {
       let filtered = bots;
       if (selectedCity && selectedCity !== "All") {
         filtered = filtered.filter(
-          (bot) => bot.data[0].position.city === selectedCity.toLowerCase(),
+          (bot) =>
+            bot?.data?.[0]?.position?.city?.toLowerCase() ===
+            selectedCity.toLowerCase(),
         );
       }
       setfilteredBots(filtered);
@@ -99,7 +111,7 @@ const Map = () => {
     setzoomTo(null);
     setselectedPin(null);
   }, [selectedCity]);
-  console.log(selectedPin)
+  console.log(filteredBots)
   return (
     <div className="m-2 flex flex-1 flex-col ">
       <div className="flex mb-1 gap-1">
@@ -152,7 +164,10 @@ const Map = () => {
               <Marker
                 icon={customIcon}
                 key={idx}
-                position={[bot.data[0].position.lat, bot.data[0].position.lng]}
+                position={[
+                  Number(bot.data[0].position.lat),
+                  Number(bot.data[0].position.lng),
+                ]}
                 eventHandlers={{
                   click: () => {
                     setzoomTo([

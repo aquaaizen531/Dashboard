@@ -10,7 +10,7 @@ router.post("/logout", authenticate, userLogController.logout);
 router.get("/getlogs", authenticate, userLogController.getLogs);
 router.get("/getusers", authenticate, userController.getUsers);
 router.post("/adduser", authenticate, userController.adduser);
-router.put("/edituser/:id", authenticate, userController.edituser);
+router.patch("/edituser/:id", authenticate, userController.edituser);
 router.put("/updateProfile/:id", authenticate, userController.profileupdate);
 router.delete("/deleteuser/:id", authenticate, userController.deleteUser);
 router.post("/authenticate/me", authenticate, userController.auth);

@@ -1,3 +1,4 @@
+import { useBotData } from "@/context/BotContext";
 import React, { useMemo } from "react";
 import {
   Bar,
@@ -9,66 +10,82 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { useBotData } from "../../context/BotContext";
 
 const Barchart = () => {
-  const { botData } = useBotData();
+  const { dashboardStats } = useBotData();
+  console.log("dashboardStats:", dashboardStats);
   const wasteData = useMemo(() => {
-    if (!botData) return [];
-    const formatedData = botData.flatMap((bot) =>
-      bot.data.map((data) => ({
-        name: bot.name,
-        wasteTray:
-          data.Wastetraystatus === "Half"
-            ? 50
-            : data.Wastetraystatus === "Full"
-              ? 100
-              : 0,
-      })),
-    );
-    return formatedData;
-  }, [botData]);
+    if (!dashboardStats?.halfHourHistory) return [];
+
+    return dashboardStats.halfHourHistory.map((bot) => ({
+      name: bot.bot,
+      wasteTray: bot.wasteTray,
+    }));
+  }, [dashboardStats]);
 
   return (
-    <ResponsiveContainer>
-      <BarChart
-        // width={400}
-        // height={400}
-        data={wasteData}
-        margin={{ right: 30, top: 20, bottom: 20 }}
-      >
-        <YAxis label={{ value: "Waste Tray %", angle: -90, dx: -10 }} />
-        <XAxis dataKey="name" />
-        <CartesianGrid strokeDasharray="5 5" />
-        <Tooltip />
-        <Legend />
-        <Bar
-          type={"monotone"}
-          dataKey="wasteTray"
-          fill="#3b82f6"
-          stroke="#2563eb"
-        />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="bg-white rounded-xl shadow-md w-full h-[350px] flex flex-col">
+      <div className="p-4 border-b">
+        <h4 className="text-lg font-semibold text-gray-900">Waste Tray</h4>
+      </div>
+      <div className="p-3">
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={wasteData}>
+            <defs>
+              <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#8884d8" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              strokeOpacity={0.5}
+            />
+            <XAxis
+              dataKey="name"
+              stroke="#888888"
+              fontSize={12}
+              // interval={0}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              // domain={[0, 100]}
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `${value}%`}
+            />
+            <Tooltip
+              formatter={(value) => `${value}%`}
+              labelFormatter={(label, payload) => {
+                if (payload && payload.length) {
+                  return payload[0].payload.fullDate;
+                }
+                return label;
+              }}
+              cursor={{ fill: "rgba(238, 238, 238, 0.5)" }}
+              contentStyle={{
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid #ccc",
+                borderRadius: "0.5rem",
+              }}
+            />
+            <Legend />
+            <Bar
+              type={"monotone"}
+              dataKey="wasteTray"
+              name="Waste Tray %"
+              fill="url(#colorGradient)"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 };
-
-// const CUstomTooltip = ({ active, payload, label }) => {
-//   if (active && payload && payload.length) {
-//     return (
-//       <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md ">
-//         <p className="font-medium  ">{label}</p>
-//         <p className="text-sm text-blue-400  ">
-//           Product 1:
-//           <span className="ml-2">{payload[0].value}</span>
-//         </p>
-//         <p className="text-sm text-indigo-400  ">
-//           Product 2:
-//           <span className="ml-2">{payload[1].value}</span>
-//         </p>
-//       </div>
-//     );
-//   }
-// };
 
 export default Barchart;

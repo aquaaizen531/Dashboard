@@ -123,7 +123,7 @@ export default function Sidebar({ role = "admin" }) {
                     )}
                     style={{
                       backgroundColor: isActive
-                        ? "var(--sidebar-active-color)"
+                        ? "var(--secondary-bg-color)"
                         : "transparent",
                       color: isActive
                         ? "var(--primary-text-color)"

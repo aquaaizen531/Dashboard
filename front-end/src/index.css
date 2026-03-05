@@ -29,7 +29,7 @@
 }
 
 :root {
-  --primary-bg-color: #f5f5f5;
+  --primary-bg-color: white;
   --secondary-bg-color: #e8e8e8;
   --primary-text-color: #000000;
   --primary-table-odd-bg: #f5f5f5;

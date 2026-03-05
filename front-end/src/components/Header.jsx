@@ -49,7 +49,7 @@ export default function Header({ activeSection }) {
   };
   return (
     <div
-      className=""
+      className="border-b"
       style={{
         background: "var(--primary-bg-color)",
       }}

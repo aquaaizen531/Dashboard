@@ -11,7 +11,7 @@ const StatCard = (stat) => {
           <p className="text-xs font-medium text-muted-foreground sm:text-sm">
             {stat.title}
           </p>
-          <p className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+          <p className="mt-2  font-bold tracking-tight text-md lg:text-xl">
             {stat.value}
           </p>
           {stat.change && (
@@ -31,7 +31,7 @@ const StatCard = (stat) => {
             </div>
           )}
         </div>
-        <div className={`rounded-lg p-2 sm:p-2.5 ${stat.iconBg}`}>
+        <div className={`rounded-lg p-1 sm:p-1.5 ${stat.iconBg}`}>
           <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.iconColor}`} />
         </div>
       </div>

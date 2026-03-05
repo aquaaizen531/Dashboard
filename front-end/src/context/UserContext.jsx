@@ -18,16 +18,16 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     mefetch();
   }, []);
-  useEffect(() => {
-    if (!userDetails) return;
+  // useEffect(() => {
+  //   if (!userDetails) return;
 
-    const interval = setInterval(() => {
-      axios.post("/presence/ping");
-    }, 25000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [userDetails]);
+  //   const interval = setInterval(() => {
+  //     axios.post("/presence/ping");
+  //   }, 25000);
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, [userDetails]);
   return (
     <UserContext.Provider value={{ userDetails, setuserDetails, mefetch }}>
       {children}

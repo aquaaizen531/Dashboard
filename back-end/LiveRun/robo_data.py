@@ -204,39 +204,72 @@ def init_data(userid):
     return data
 
 
+# def distance_(db_data, i):
+
+#     location = db_data[i]['data'][0]['position']['lat']
+
+#     found_key = next(
+#         (k for k, v in pos[f'loc_{i+1}'].items() if isinstance(v, list) and location in v), None)
+
+#     lat1 = db_data[i]['data'][0]['position']['lat']
+#     lon1 = db_data[i]['data'][0]['position']['lng']
+
+#     if found_key[3] == "4":
+#         key = 1
+#     else:
+#         key = int(found_key[3])+1
+
+#     lat2 = pos[f'loc_{i+1}'][f'loc{key}'][0]
+#     lon2 = pos[f'loc_{i+1}'][f'loc{key}'][1]
+
+#     next_pos = [lat2, lon2]
+#     R = 6371  # Radius of Earth in km (use 6371000 for meters)
+
+#     # Convert degrees to radians
+#     lat1, lon1, lat2, lon2 = map(radians, [1, 2, 3, 4])
+
+#     dlat = lat2 - lat1
+#     dlon = lon2 - lon1
+
+#     a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+#     c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+#     distance_km = R * c
+#     return distance_km, next_pos
+
 def distance_(db_data, i):
 
-    location = db_data[i]['data'][0]['position']['lat']
+    pos_data = db_data[i]['data'][0]['position']
 
-    found_key = next(
-        (k for k, v in pos[f'loc_{i+1}'].items() if isinstance(v, list) and location in v), None)
+    step = pos_data.get("step", 1)
 
-    lat1 = db_data[i]['data'][0]['position']['lat']
-    lon1 = db_data[i]['data'][0]['position']['lng']
+    # next step
+    next_step = step + 1 if step < 4 else 1
 
-    if found_key[3] == "4":
-        key = 1
-    else:
-        key = int(found_key[3])+1
+    lat1 = float(pos_data['lat'])
+    lon1 = float(pos_data['lng'])
 
-    lat2 = pos[f'loc_{i+1}'][f'loc{key}'][0]
-    lon2 = pos[f'loc_{i+1}'][f'loc{key}'][1]
+    lat2 = float(pos[f'loc_{i+1}'][f'loc{next_step}'][0])
+    lon2 = float(pos[f'loc_{i+1}'][f'loc{next_step}'][1])
 
-    next_pos = [lat2, lon2]
-    R = 6371  # Radius of Earth in km (use 6371000 for meters)
+    # Save next step
+    pos_data["step"] = next_step
 
-    # Convert degrees to radians
-    lat1, lon1, lat2, lon2 = map(radians, [1, 2, 3, 4])
+    R = 6371
+
+    lat1, lon1, lat2, lon2 = map(
+        radians, [lat1, lon1, lat2, lon2]
+    )
 
     dlat = lat2 - lat1
     dlon = lon2 - lon1
 
-    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    a = sin(dlat/2)**2 + cos(lat1)*cos(lat2)*sin(dlon/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
 
     distance_km = R * c
-    return distance_km, next_pos
 
+    return distance_km, [str(lat2), str(lon2)]
 
 def rotate_list(lst):
     first = lst.pop(0)

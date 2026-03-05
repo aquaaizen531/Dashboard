@@ -9,52 +9,98 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  LabelList,
 } from "recharts";
-
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+const chartConfig = {
+  time: {
+    label: "time",
+    color: "#8884d8",
+  },
+  distance: {
+    label: "distance",
+    color: "#8884d8",
+  },
+};
 const DistanceChart = () => {
-  const { botData } = useBotData();
+  const { dashboardStats } = useBotData();
   const data = useMemo(() => {
-    if (!botData) return [];
-    const formatedData = botData.flatMap((bot) =>
-      bot.data.map((data) => ({
-        time: new Date(data.date).toLocaleTimeString([], {
+    if (!dashboardStats?.todayBotData) return [];
+    return dashboardStats.todayBotData.map((bot) => {
+      const dateObj = new Date(bot.time);
+      return {
+        time: dateObj.toLocaleTimeString("en-In", {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
         }),
-        distanceCovered: data.DistanceCovered,
-      })),
-    );
-    return formatedData;
-  }, [botData]);
+        distance: Math.round(bot.avgDistance),
+      };
+    });
+  }, [dashboardStats]);
 
   return (
-    <div>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          width="100%"
-          height="100%"
-          data={data}
-          margin={{ right: 40, top: 20 }}
-        >
-          <XAxis dataKey="time" />
-          <YAxis
-            dataKey="distanceCovered"
-            label={{ value: "Distance Covered (m)", angle: -90, dx: -20 }}
-          />
-          <CartesianGrid strokeDasharray="5 5" />
-          <Tooltip />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="distanceCovered"
-            name="Distance Covered"
-            fill="#3b82f6"
-            stroke="#10b981"
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <Card className="h-[350px] w-full">
+      <CardHeader>
+        <CardTitle>Average Distance</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer className="" config={chartConfig}>
+          <LineChart
+            accessibilityLayer
+            data={data}
+            margin={{
+              top: 20,
+              left: 12,
+              right: 12,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="time"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent indicator="line" />}
+            />
+            <Line
+              dataKey="distance"
+              type="natural"
+              stroke="#8884d8"
+              strokeWidth={2}
+              dot={{
+                fill: "#8884d8",
+              }}
+              activeDot={{
+                r: 6,
+              }}
+            >
+              <LabelList
+                position="top"
+                offset={12}
+                className="fill-foreground"
+                fontSize={12}
+              />
+            </Line>
+          </LineChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   );
 };
 

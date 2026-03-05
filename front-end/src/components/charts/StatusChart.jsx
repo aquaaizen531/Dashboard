@@ -1,63 +1,134 @@
 import React, { useMemo } from "react";
 import { useBotData } from "../../context/BotContext";
+import { Pie, PieChart, Label } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  Cell,
-  Legend,
-} from "recharts";
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
+const chartConfig = {
+  bots: {
+    label: "bots",
+  },
+  active: {
+    label: "active",
+    color: "#4B4B4B",
+  },
+  idle: {
+    label: "idle",
+    color: "#808080",
+  },
+  charging: {
+    label: "charging",
+    color: "#B3B3B3",
+  },
+};
 
 const StatusChart = () => {
-  const { botData } = useBotData();
+  const { dashboardStats } = useBotData();
   const data = useMemo(() => {
-    if (!botData) return [];
+    if (!dashboardStats)
+      return [
+        { name: "charging", value: 0, fill: "#3b82f6" },
+        { name: "idle", value: 0, fill: "#facc15" },
+        { name: "active", value: 0, fill: "#22c55e" },
+      ];
     let formatedData = [
-      { name: "charging", value: 0 },
-      { name: "idle", value: 0 },
-      { name: "active", value: 0 },
+      { name: "charging", value: 0, fill: "#3b82f6" },
+      { name: "idle", value: 0, fill: "#facc15" },
+      { name: "active", value: 0, fill: "#22c55e" },
     ];
-    botData.forEach((bot) => {
-      bot.data.forEach((data) => {
-        if (data.Status === "Charging") {
-          formatedData[0].value += 1;
-        } else if (data.Status === "Idle") {
-          formatedData[1].value += 1;
-        } else {
-          formatedData[2].value += 1;
-        }
-      });
+    dashboardStats?.halfHourHistory?.forEach((bot) => {
+      const status = bot?.status?.toLowerCase();
+      if (status === "charging") {
+        formatedData[0].value += 1;
+      } else if (bot.status.toLowerCase() === "idle") {
+        formatedData[1].value += 1;
+      } else {
+        formatedData[2].value += 1;
+      }
     });
     return formatedData;
-  }, [botData]);
-  const COLORS = ["#3b82f6", "#facc15", "#22c55e"];
+  }, [dashboardStats]);
+  const totalBots = React.useMemo(() => {
+    return data.reduce((acc, curr) => acc + curr.value, 0);
+  }, [data]);
   return (
-    <div>
-      <ResponsiveContainer height="100%" width="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-            fill="#8884d8"
-            label
+    <Card className="p-0 pb-3">
+      <div className="p-4 border-b">
+        <h4 className="text-lg font-semibold text-gray-900">Bot Status</h4>
+      </div>
+      <div className="flex items-center">
+        <CardContent className="flex-1 pb-0">
+          <ChartContainer
+            config={chartConfig}
+            className="mx-auto aspect-square max-h-[250px]"
           >
-            {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
+            <PieChart className="flex">
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
               />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={60}
+                strokeWidth={5}
+              >
+                <Label
+                  content={({ viewBox }) => {
+                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                      return (
+                        <text
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                        >
+                          <tspan
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            className="fill-foreground text-3xl font-bold"
+                          >
+                            {totalBots.toLocaleString()}
+                          </tspan>
+                          <tspan
+                            x={viewBox.cx}
+                            y={(viewBox.cy || 0) + 24}
+                            className="fill-muted-foreground"
+                          >
+                            Bots
+                          </tspan>
+                        </text>
+                      );
+                    }
+                  }}
+                />
+              </Pie>
+            </PieChart>
+          </ChartContainer>
+        </CardContent>
+        <div className="flex-1 space-y-2 mt-6">
+          {data.map((bot, index) => (
+            <div key={index} className="flex items-center gap-4 text-md">
+              <div className="flex items-center gap-2">
+                <div
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: bot.fill }}
+                />
+                <span className="text-xs">{bot.name}</span>
+              </div>
+              <span className="font-medium">{bot.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Card>
   );
 };
 

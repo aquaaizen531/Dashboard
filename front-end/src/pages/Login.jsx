@@ -84,7 +84,7 @@ const Login = () => {
   return (
     <div>
       <div
-        className=" min-h-screen w-screen relative bg-cover bg-center bg-[#212429] "
+        className=" min-h-screen w-screen relative bg-cover bg-center bg-[#ffffff] "
         // style={{ backgroundImage: `url(${loginbg})` }}
       >
         <div className="bg-amber-50">
@@ -95,15 +95,14 @@ const Login = () => {
             <img
               src={logo}
               alt="D-RubeLabs"
-              className="absolute h-[20px] md:h-[40px] m-1 md:m-5 invert-100 "
+              className="absolute h-[20px] md:h-[40px] m-1 md:m-5 "
             />
           </a>
         </div>
-        {/* <div className="blur-div"></div> */}
-        <div className="relative z-10 flex items-center justify-center w-full h-screen ">
-          <div className="bg-[#111419] w-[80%] h-[70%] lg:h-[80%] rounded-xl parent ">
+        <div className="relative z-10 flex items-center justify-center w-full h-screen  ">
+          <div className="bg-[#111419] w-[80%] h-[70%] lg:h-[80%] rounded-xl parent shadow-2xl border-0 overflow-hidden ">
             <div
-              className="relative h-full hide-mobile w-[40%] sm:w-[45%] md:w-[50%] lg:w-[60%] rounded-l-xl bg-cover"
+              className="relative h-full hide-mobile w-[40%] sm:w-[45%] md:w-[50%] lg:w-[60%] rounded--xl bg-cover"
               style={{
                 backgroundImage: `url(${loginbg})`,
                 backgroundSize: "130%",

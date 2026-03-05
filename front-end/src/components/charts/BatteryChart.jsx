@@ -1,25 +1,35 @@
 import React, { useMemo } from "react";
-import { Area, AreaChart, XAxis, YAxis, CartesianGrid } from "recharts";
-import { useBotData } from "../../context/BotContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Area,
+  AreaChart,
+  XAxis,
+  CartesianGrid,
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useBotData } from "../../context/BotContext";
 
 const chartConfig = {
-  humidity: {
-    label: "Humidity",
+  time: {
+    label: "time",
     color: "#8884d8",
   },
-  temp: {
-    label: "Temperature",
-    color: "#B3B3B3",
+  battery: {
+    label: "battery",
+    color: "#8884d8",
   },
 };
 
-const HumidityChart = () => {
+const BatteryChart = () => {
   const { dashboardStats } = useBotData();
   const data = useMemo(() => {
     if (!dashboardStats?.todayBotData) return [];
@@ -31,17 +41,15 @@ const HumidityChart = () => {
           minute: "2-digit",
           hour12: true,
         }),
-        humidity: bot.avgHumidity,
-        temp: bot.avgTemp,
+        battery: bot.avgBattery,
       };
     });
   }, [dashboardStats]);
-
   return (
     <div className="flex-1">
       <Card>
         <CardHeader>
-          <CardTitle>Temperature and Humidity</CardTitle>
+          <CardTitle>Battery</CardTitle>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig}>
@@ -62,33 +70,15 @@ const HumidityChart = () => {
               />
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
               <defs>
-                <linearGradient id="fillHumidity" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="fillBattery" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="#8884d8" stopOpacity={0.1} />
                 </linearGradient>
-                <linearGradient
-                  id="fillTemperature"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop offset="5%" stopColor="#d73a15" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#d73a15" stopOpacity={0.1} />
-                </linearGradient>
               </defs>
               <Area
-                dataKey="temp"
+                dataKey="battery"
                 type="natural"
-                fill="url(#fillTemperature)"
-                fillOpacity={0.4}
-                stroke="#d73a15"
-                stackId="a"
-              />
-              <Area
-                dataKey="humidity"
-                type="natural"
-                fill="url(#fillHumidity)"
+                fill="url(#fillBattery)"
                 fillOpacity={0.4}
                 stroke="#8884d8"
                 stackId="a"
@@ -101,4 +91,4 @@ const HumidityChart = () => {
   );
 };
 
-export default HumidityChart;
+export default BatteryChart;

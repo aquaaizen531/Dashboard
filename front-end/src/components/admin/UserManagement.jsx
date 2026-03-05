@@ -1,32 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "../../css/dropdown.css";
 import "../../css/Bg.css";
-import { Dropdown } from "primereact/dropdown";
 import { toast } from "react-toastify";
 import axios from "../../config/axios.config";
 import { RiArrowDownWideLine } from "react-icons/ri";
-import { saveAs } from "file-saver";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Dropdown } from "primereact/dropdown";
 import {
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Button,
-  select,
-} from "@material-tailwind/react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
 const UserManagement = () => {
   const [search, setsearch] = useState("");
   const [users, setusers] = useState([]);
   const [filteredUsers, setfilteredUsers] = useState([]);
   const [userRole, setuserRole] = useState("");
   const [activityStatus, setactivityStatus] = useState(null);
-  const [isRoleDropdownOpen, setisRoleDropdownOpen] = useState(false);
   const [isAddUserOpen, setisAddUserOpen] = useState(false);
   const [isEdit, setisEdit] = useState(false);
   const [updation, setupdation] = useState(true);
-  const [isUserActive, setisUserActive] = useState(true);
   const [showpass, setshowpass] = useState({
     key: false,
     email: null,
@@ -39,10 +35,6 @@ const UserManagement = () => {
     location: "",
     role: "",
   });
-  const [isActivityStatusDropdownOpen, setisActivityStatusDropdownOpen] =
-    useState(false);
-  const roleDropdownRef = useRef(null);
-  const activityStatusDropdownRef = useRef(null);
   const [pass, setpass] = useState([]);
   useEffect(() => {
     const fetchdata = () => {
@@ -59,7 +51,6 @@ const UserManagement = () => {
       axios
         .get("/pass")
         .then((res) => {
-          // console.log(res.data.data);
           setpass(res.data.data || []);
         })
         .catch((err) => {
@@ -82,12 +73,12 @@ const UserManagement = () => {
           pass: d1 ? d1.pass : null,
         };
       });
-      // console.log(mergedData);
       let filtered = mergedData;
       if (userRole) {
-        filtered = filtered.filter(
-          (user) => user.role.toLowerCase() === userRole.toLowerCase()
-        );
+        filtered = filtered.filter((user) => {
+          if (userRole === "All") return true;
+          return user.role.toLowerCase() === userRole.toLowerCase();
+        });
       }
       if (activityStatus !== null) {
         filtered = filtered.filter((user) => user.online === activityStatus);
@@ -99,54 +90,19 @@ const UserManagement = () => {
             user.email?.toLocaleLowerCase().includes(search.toLowerCase()) ||
             String(user.phone)
               ?.toLowerCase()
-              .includes(search.toLocaleLowerCase())
+              .includes(search.toLocaleLowerCase()),
         );
       }
       setfilteredUsers(filtered);
     };
     handleFilter();
   }, [search, users, userRole, activityStatus, pass]);
-  const roleDropdown = () => {
-    setisRoleDropdownOpen(!isRoleDropdownOpen);
-  };
-  const activityStatusDropdown = () => {
-    setisActivityStatusDropdownOpen(!isActivityStatusDropdownOpen);
-  };
   const toggleaddUser = () => {
     setisAddUserOpen(!isAddUserOpen);
   };
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (
-        roleDropdownRef.current &&
-        !roleDropdownRef.current.contains(event.target)
-      ) {
-        setisRoleDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, []);
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (
-        activityStatusDropdownRef.current &&
-        !activityStatusDropdownRef.current.contains(event.target)
-      ) {
-        setisActivityStatusDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, []);
   const [editId, seteditId] = useState(null);
   const handleEdit = (user) => {
     setisEdit(true);
-    setisUserActive(user.activityStatus);
     seteditId(user._id);
     setformvalue({
       name: user.name,
@@ -156,7 +112,6 @@ const UserManagement = () => {
       role: user.role,
       activityStatus: user.activityStatus,
     });
-    // console.log(formvalue);
     setisAddUserOpen(true);
   };
   const handleDelete = (id) => {
@@ -174,7 +129,6 @@ const UserManagement = () => {
   };
   const handleAddUser = (e) => {
     e.preventDefault();
-    // console.log(formvalue);
     axios
       .post("/adduser", formvalue)
       .then((res) => {
@@ -196,12 +150,12 @@ const UserManagement = () => {
       });
   };
   const handleEditSubmit = (e) => {
+    console.log("first");
     e.preventDefault();
-    // console.log(formvalue);
     axios
-      .put(`/edituser/${editId}`, formvalue)
+      .patch(`/edituser/${editId}`, formvalue)
       .then((res) => {
-        // console.log(res);
+        console.log(res);
         setusers(res.data.users);
         setisEdit(false);
         toggleaddUser();
@@ -219,11 +173,7 @@ const UserManagement = () => {
         toast.error("Failed to Update User!");
       });
   };
-  const roleOptions = [
-    { label: "Admin", value: "admin" },
-    { label: "Operator", value: "Operator" },
-    { label: "Analyst", value: "Analyst" },
-  ];
+  const roleOptions = ["All", "admin", "Operator", "Analyst"];
   return (
     <div className="m-2">
       <div className="mb-2 flex gap-1 md:gap-2">
@@ -237,85 +187,52 @@ const UserManagement = () => {
           />
         </div>
         {/* role dropdown */}
-        <div className="dropdown-prnt-div" ref={roleDropdownRef}>
-          <div onClick={roleDropdown} className="dropdown">
-            <div className="dropdown-div2">
-              <p className="role flex">{userRole ? userRole : "User Role"}</p>
-            </div>
-            <span className="role">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-[130px] justify-between">
+              {userRole ? (userRole === "All" ? "All" : userRole) : "Role"}
               <RiArrowDownWideLine />
-            </span>
-          </div>
-          {isRoleDropdownOpen && (
-            <div
-              className=""
-              style={{
-                background: "radial-gradient(circle at top, #3a6db0, #1b1b1b)",
-              }}
-            >
-              <div className="options-div dropdown-glass">
-                <ul className="dropdown-ul">
-                  {["All", "Admin", "Operator"].map((role) => (
-                    <li
-                      className="dropdown-li"
-                      key={role}
-                      onClick={() => {
-                        setuserRole(role === "All" ? "" : role);
-                        setisRoleDropdownOpen(false);
-                      }}
-                    >
-                      {role}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[130px] p-1">
+            {roleOptions.map((role, idx) => (
+              <DropdownMenuItem key={idx} onClick={() => setuserRole(role)}>
+                {role}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         {/*  activity status dropdown */}
-        <div className="dropdown-prnt-div" ref={activityStatusDropdownRef}>
-          <div onClick={activityStatusDropdown} className="dropdown">
-            <div className="dropdown-div2">
-              <p className="role">
-                {activityStatus && activityStatus === true
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-[130px] justify-between">
+              {activityStatus === null
+                ? "Status"
+                : activityStatus === true
                   ? "Online"
-                  : activityStatus === false
-                  ? "Offline"
-                  : "Status"}
-              </p>
-            </div>
-            <span>
+                  : "Offline"}
               <RiArrowDownWideLine />
-            </span>
-          </div>
-          {isActivityStatusDropdownOpen && (
-            <div
-              className=""
-              style={{
-                background: "radial-gradient(circle at top, #3a6db0, #1b1b1b)",
-              }}
-            >
-              <div className="options-div dropdown-glass">
-                <ul className="dropdown-ul">
-                  {["All", "Online", "Offline"].map((status) => (
-                    <li
-                      className="dropdown-li"
-                      key={status}
-                      onClick={() => {
-                        setactivityStatus(
-                          status === "All" ? null : status === "Online"
-                        );
-                        setisActivityStatusDropdownOpen(false);
-                      }}
-                    >
-                      {status}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[130px] p-1">
+            {["All", "Online", "Offline"].map((status, idx) => (
+              <DropdownMenuItem
+                key={idx}
+                onClick={() =>
+                  setactivityStatus(
+                    status === "All"
+                      ? null
+                      : status === "Online"
+                        ? true
+                        : false,
+                  )
+                }
+              >
+                {status}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         {/*  add new user section */}
         <div className="dropdown-prnt-div ">
           <button className="add-user-btn" onClick={toggleaddUser}>
@@ -344,27 +261,25 @@ const UserManagement = () => {
                   ? ["Name", "Email", "Phone", "Password", "Location", "Role"]
                   : ["Name", "Email", "Phone", "Location", "Role"]
                 ).map((feild) => {
-                  const feildName = feild.toLowerCase();
                   const roleOptions = [
                     { label: "Admin", value: "admin" },
-                    { label: "Operator", value: "Operator" },
-                    { label: "Analyst", value: "Analyst" },
+                    { label: "Operator", value: "operator" },
+                    { label: "Analyst", value: "analyst" },
                   ];
                   const locationOptions = [
-                    { label: "Kochi", value: "Kochi" },
-                    { label: "Chennai", value: "Chennai" },
+                    { label: "Kochi", value: "kochi" },
+                    { label: "Chennai", value: "chennai" },
                   ];
                   if (feild === "Role") {
                     return (
                       <div key={feild} className="relative mb-2 mt-1">
                         <Dropdown
-                          
-                          value={formvalue[feildName] || ""}
+                          value={formvalue.role || null}
                           options={roleOptions}
                           onChange={(e) =>
                             setformvalue({
                               ...formvalue,
-                              [feildName]: e.value,
+                              role: e.value,
                             })
                           }
                           className="custom-select bg-white w-full h-[50px] rounded-lg pl-[20px] text-xs 
@@ -378,18 +293,18 @@ const UserManagement = () => {
                     return (
                       <div key={feild} className="relative mb-1 mt-1">
                         <Dropdown
-                        value={formvalue[feildName] || ""}
-                        options={locationOptions}
-                        onchange={(e)=>
-                          setformvalue({
-                            ...formvalue,
-                            [feildName]: e.value,
-                          })
-                        }
-                        className="custom-select bg-white w-full h-[50px] rounded-lg pl-[20px] text-xs 
+                          value={formvalue.location || null}
+                          options={locationOptions}
+                          onChange={(e) =>
+                            setformvalue({
+                              ...formvalue,
+                              location: e.value,
+                            })
+                          }
+                          className="custom-select bg-white w-full h-[50px] rounded-lg pl-[20px] text-xs 
                         border border-black-300 focus:outline-none "
                           required
-                          placeholder="Role"
+                          placeholder="Location"
                         />
                       </div>
                     );
@@ -412,10 +327,10 @@ const UserManagement = () => {
                         feild === "Email"
                           ? "email"
                           : feild === "Phone"
-                          ? "number"
-                          : feild === "Password"
-                          ? "password"
-                          : "text"
+                            ? "number"
+                            : feild === "Password"
+                              ? "password"
+                              : "text"
                       }
                     />
                   );
@@ -464,7 +379,7 @@ const UserManagement = () => {
               </form>
             </div>
           </div>,
-          document.body
+          document.body,
         )}
       <div className="max-h-[calc(100vh-180px)] ">
         <dir className="tbldiv">
@@ -473,7 +388,6 @@ const UserManagement = () => {
               <tr>
                 {[
                   "Sl. no.",
-                  "User ID",
                   "Full name",
                   "Email",
                   "Phone",
@@ -493,7 +407,6 @@ const UserManagement = () => {
               {filteredUsers.map((user, idx) => (
                 <tr key={user._id} className="bg-e-o">
                   <td className="tblhdng ">{idx + 1}</td>
-                  <td className="tblhdng ">{user._id}</td>
                   <td className="tblhdng ">{user.name}</td>
                   <td className="tblhdng ">{user.email}</td>
                   <td className="tblhdng ">{user.phone} </td>

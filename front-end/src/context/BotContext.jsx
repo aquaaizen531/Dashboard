@@ -5,7 +5,6 @@ import socket from "../config/socket";
 const BotContext = createContext();
 export const BotProvider = ({ children }) => {
   const [botData, setbotData] = useState([]);
-  const [botHistory, setbotHistory] = useState([]);
   const [dashboardStats, setdashboardStats] = useState(null);
   useEffect(() => {
     const verifyUser = async () => {
@@ -21,31 +20,28 @@ export const BotProvider = ({ children }) => {
     verifyUser();
   }, []);
   useEffect(() => {
-    socket.on("connect", () => {
-      socket.emit("initDashboard");
-    });
     socket.on("botData", (data) => {
       setbotData(data);
-    });
-    socket.on("todaysData", (todayHistory) => {
-      setbotHistory(todayHistory);
     });
     socket.on("dashboardStats", (data) => {
       setdashboardStats(data);
     });
+    socket.on("connect", () => {
+      socket.emit("initDashboard");
+    });
     return () => {
       socket.off("botData");
-      socket.off("todaysData");
       socket.off("dashboardStats");
+      socket.off("connect");
     };
   }, []);
+  console.log(botData);
+
   return (
     <BotContext.Provider
       value={{
         botData,
         setbotData,
-        botHistory,
-        setbotHistory,
         dashboardStats,
         setdashboardStats,
       }}
