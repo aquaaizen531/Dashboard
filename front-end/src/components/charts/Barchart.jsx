@@ -1,4 +1,4 @@
-import { useBotData } from "@/context/BotContext";
+// import { useBotData } from "@/context/BotContext";
 import React, { useMemo } from "react";
 import {
   Bar,
@@ -10,18 +10,69 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-
+const dummyhalfHourHistory = [
+  {
+    bot: "1123",
+    status: "cleaning",
+    avgBattery: 78,
+    avgDistance: 8345.92,
+    avgTemp: 32,
+    avgHumidity: 79,
+    wasteTray: 50,
+  },
+  {
+    bot: "1124",
+    status: "cleaning",
+    avgBattery: 72,
+    avgDistance: 8358.29,
+    avgTemp: 31,
+    avgHumidity: 76,
+    wasteTray: 45,
+  },
+  {
+    bot: "1125",
+    status: "cleaning",
+    avgBattery: 69,
+    avgDistance: 8425.03,
+    avgTemp: 28,
+    avgHumidity: 74,
+    wasteTray: 52,
+  },
+  {
+    bot: "1126",
+    status: "cleaning",
+    avgBattery: 65,
+    avgDistance: 8798.08,
+    avgTemp: 28,
+    avgHumidity: 72,
+    wasteTray: 48,
+  },
+  {
+    bot: "1127",
+    status: "cleaning",
+    avgBattery: 61,
+    avgDistance: 8796.46,
+    avgTemp: 30,
+    avgHumidity: 75,
+    wasteTray: 55,
+  },
+];
 const Barchart = () => {
-  const { dashboardStats } = useBotData();
-  console.log("dashboardStats:", dashboardStats);
+  // const { dashboardStats } = useBotData();
   const wasteData = useMemo(() => {
-    if (!dashboardStats?.halfHourHistory) return [];
+    // if (!dashboardStats?.halfHourHistory) return [];
+    if (!dummyhalfHourHistory) return [];
 
-    return dashboardStats.halfHourHistory.map((bot) => ({
+    return dummyhalfHourHistory.map((bot) => ({
       name: bot.bot,
       wasteTray: bot.wasteTray,
     }));
-  }, [dashboardStats]);
+    // return dashboardStats.halfHourHistory.map((bot) => ({
+    //   name: bot.bot,
+    //   wasteTray: bot.wasteTray,
+    // }));
+    // }, [dashboardStats]);
+  }, []);
 
   return (
     <div className="bg-white rounded-xl shadow-md w-full h-[350px] flex flex-col">

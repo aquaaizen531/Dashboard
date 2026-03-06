@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useBotData } from "../../context/BotContext";
+// import { useBotData } from "../../context/BotContext";
 import { Pie, PieChart, Label } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -27,36 +27,65 @@ const chartConfig = {
     color: "#B3B3B3",
   },
 };
-
+const dummyBots = [
+  { botId: "BOT-1123", status: "active" },
+  { botId: "BOT-1124", status: "charging" },
+  { botId: "BOT-1125", status: "idle" },
+  { botId: "BOT-1126", status: "active" },
+  { botId: "BOT-1127", status: "charging" },
+  { botId: "BOT-1128", status: "active" },
+  { botId: "BOT-1129", status: "idle" },
+];
 const StatusChart = () => {
-  const { dashboardStats } = useBotData();
+  // const { dashboardStats } = useBotData();
+  // const data = useMemo(() => {
+  //   if (!dashboardStats)
+  //     return [
+  //       { name: "charging", value: 0, fill: "#3b82f6" },
+  //       { name: "idle", value: 0, fill: "#facc15" },
+  //       { name: "active", value: 0, fill: "#22c55e" },
+  //     ];
+  //   let formatedData = [
+  //     { name: "charging", value: 0, fill: "#3b82f6" },
+  //     { name: "idle", value: 0, fill: "#facc15" },
+  //     { name: "active", value: 0, fill: "#22c55e" },
+  //   ];
+  //   dashboardStats?.halfHourHistory?.forEach((bot) => {
+  //     const status = bot?.status?.toLowerCase();
+  //     if (status === "charging") {
+  //       formatedData[0].value += 1;
+  //     } else if (bot.status.toLowerCase() === "idle") {
+  //       formatedData[1].value += 1;
+  //     } else {
+  //       formatedData[2].value += 1;
+  //     }
+  //   });
+  //   return formatedData;
+  // }, [dashboardStats]);
+  // const totalBots = React.useMemo(() => {
+  //   return data.reduce((acc, curr) => acc + curr.value, 0);
+  // }, [data]);
   const data = useMemo(() => {
-    if (!dashboardStats)
-      return [
-        { name: "charging", value: 0, fill: "#3b82f6" },
-        { name: "idle", value: 0, fill: "#facc15" },
-        { name: "active", value: 0, fill: "#22c55e" },
-      ];
     let formatedData = [
       { name: "charging", value: 0, fill: "#3b82f6" },
       { name: "idle", value: 0, fill: "#facc15" },
       { name: "active", value: 0, fill: "#22c55e" },
     ];
-    dashboardStats?.halfHourHistory?.forEach((bot) => {
-      const status = bot?.status?.toLowerCase();
+
+    dummyBots.forEach((bot) => {
+      const status = bot.status.toLowerCase();
+
       if (status === "charging") {
         formatedData[0].value += 1;
-      } else if (bot.status.toLowerCase() === "idle") {
+      } else if (status === "idle") {
         formatedData[1].value += 1;
       } else {
         formatedData[2].value += 1;
       }
     });
+
     return formatedData;
-  }, [dashboardStats]);
-  const totalBots = React.useMemo(() => {
-    return data.reduce((acc, curr) => acc + curr.value, 0);
-  }, [data]);
+  }, []);
   return (
     <Card className="p-0 pb-3">
       <div className="p-4 border-b">
@@ -95,7 +124,8 @@ const StatusChart = () => {
                             y={viewBox.cy}
                             className="fill-foreground text-3xl font-bold"
                           >
-                            {totalBots.toLocaleString()}
+                            {/* {totalBots.toLocaleString()} */}
+                            5
                           </tspan>
                           <tspan
                             x={viewBox.cx}

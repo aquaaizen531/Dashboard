@@ -1,4 +1,4 @@
-import { useBotData } from "@/context/BotContext";
+// import { useBotData } from "@/context/BotContext";
 import React, { useMemo } from "react";
 import {
   Bar,
@@ -10,13 +10,100 @@ import {
   Legend,
   CartesianGrid,
 } from "recharts";
+const lastweekHistory = [
+  {
+    _id: { day: "2026-03-01" },
+    activeBots: 2,
+    alerts: 4120,
+    avgBattery: 62.5,
+    avgDistance: 6200.45,
+    avgHumidity: 78.4,
+    avgTemp: 28.2,
+    avgWasteFull: 0.45,
+    operators: [
+      "684ed8b2f8a8bf79bf0e4595",
+      "68317531db31434570f3d067",
+      "6888f3213651eedf2d796391",
+      "68820908d984f13a82d34868",
+      "68355f014e6577b52aaa7066",
+    ],
+    totalbots: ["1123", "1124", "1125", "1126", "1127"],
+  },
 
+  {
+    _id: { day: "2026-03-02" },
+    activeBots: 3,
+    alerts: 5301,
+    avgBattery: 55.2,
+    avgDistance: 7120.21,
+    avgHumidity: 81.7,
+    avgTemp: 29.1,
+    avgWasteFull: 0.52,
+    operators: [
+      "684ed8b2f8a8bf79bf0e4595",
+      "68317531db31434570f3d067",
+      "6888f3213651eedf2d796391",
+    ],
+    totalbots: ["1123", "1124", "1125", "1126", "1127"],
+  },
+
+  {
+    _id: { day: "2026-03-03" },
+    activeBots: 0,
+    alerts: 6239,
+    avgBattery: -35.7144816928157,
+    avgDistance: 8544.776570659285,
+    avgHumidity: 83.74021239499129,
+    avgTemp: 29.607069266127755,
+    avgWasteFull: 0.5,
+    operators: [
+      "684ed8b2f8a8bf79bf0e4595",
+      "68317531db31434570f3d067",
+      "6888f3213651eedf2d796391",
+      "68820908d984f13a82d34868",
+      "68355f014e6577b52aaa7066",
+    ],
+    totalbots: ["1123", "1126", "1127", "1124", "1125"],
+  },
+
+  {
+    _id: { day: "2026-03-04" },
+    activeBots: 4,
+    alerts: 4890,
+    avgBattery: 70.8,
+    avgDistance: 9012.11,
+    avgHumidity: 80.2,
+    avgTemp: 30.3,
+    avgWasteFull: 0.61,
+    operators: ["684ed8b2f8a8bf79bf0e4595", "68317531db31434570f3d067"],
+    totalbots: ["1123", "1124", "1125", "1126", "1127"],
+  },
+
+  {
+    _id: { day: "2026-03-05" },
+    activeBots: 5,
+    alerts: 3712,
+    avgBattery: 82.6,
+    avgDistance: 6501.44,
+    avgHumidity: 76.5,
+    avgTemp: 27.9,
+    avgWasteFull: 0.39,
+    operators: [
+      "684ed8b2f8a8bf79bf0e4595",
+      "68317531db31434570f3d067",
+      "6888f3213651eedf2d796391",
+      "68820908d984f13a82d34868",
+    ],
+    totalbots: ["1123", "1124", "1125", "1126", "1127"],
+  },
+];
 const GradientBarChart = () => {
-  const { dashboardStats } = useBotData();
-  console.log("dashboardStats:", dashboardStats);
+  // const { dashboardStats } = useBotData();
   const data = useMemo(() => {
-    if (!dashboardStats?.lastweekHistory) return [];
-    return dashboardStats.lastweekHistory.map((item) => {
+    // if (!dashboardStats?.lastweekHistory) return [];
+    if (!lastweekHistory) return [];
+    // return dashboardStats.lastweekHistory.map((item) => {
+    return lastweekHistory.map((item) => {
       const dateObj = new Date(item._id.day);
       return {
         day: dateObj.getDate(),
@@ -28,7 +115,8 @@ const GradientBarChart = () => {
         waste: Math.round((item.avgWasteFull || 0) * 100),
       };
     });
-  }, [dashboardStats]);
+    // }, [dashboardStats]);
+  }, []);
   return (
     <div className="bg-white rounded-xl shadow-md max-h-[400px]">
       <div className="p-6 border-b">

@@ -212,6 +212,8 @@ module.exports.botsocket = (io, socket) => {
                   avgBattery: 1,
                   avgDistance: 1,
                   avgHumidity: 1,
+                  totalbots: 1,
+                  avgWasteFull: 1,
                   avgTemp: 1,
                   alerts: 1,
                 },
@@ -504,6 +506,7 @@ module.exports.botsocket = (io, socket) => {
       ]);
 
       const result = stats[0] || {};
+      console.log(result.lastweekHistory)
       const todayStats = result.todayStatsAgg?.[0] || {};
       const yesterdayStats = result.yesterdayStatsAgg?.[0] || {};
       const change = {
@@ -517,7 +520,6 @@ module.exports.botsocket = (io, socket) => {
         alerts: todayStats.alerts - yesterdayStats.alerts,
         totalbots: todayStats.totalbots - yesterdayStats.totalbots,
       };
-      console.log(result.lastMonthHistory[0]);
       target.emit("dashboardStats", {
         lastweekHistory: result.lastweekHistory || [],
         halfHourHistory: result.halfHourHistory || [],

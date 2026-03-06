@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from "react";
 import loginbg from "@/assets/bg/login_cover.png";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import StatCard from "./stat-card";
 import {
   BatteryCharging,
@@ -19,23 +11,49 @@ import {
   Thermometer,
   Wrench,
 } from "lucide-react";
-import { useBotData } from "@/context/BotContext";
+// import { useBotData } from "@/context/BotContext";
 import GradientBarChart from "./charts/WasteChart";
-
+const dummydata = {
+  activeBots: 3,
+  alerts: 253,
+  avgBattery: 65,
+  avgDistance: 8545,
+  avgHumidity: 83,
+  avgTemp: 29,
+  avgWasteFull: 0.5,
+  operators: 5,
+  totalbots: 1,
+};
+const dummyChangeData = {
+  activeBots: 1,
+  alerts: -120,
+  avgBattery: -4.5,
+  avgDistance: 320.75,
+  avgHumidity: 1.8,
+  avgTemp: -0.6,
+  avgWasteFull: 0.05,
+  operators: 0,
+  totalbots: 0,
+};
 const Dashboard = () => {
-  const { dashboardStats } = useBotData();
+  // const { dashboardStats } = useBotData();
   const [todayData, settodayData] = useState({});
   const [changeData, setChangeData] = useState({});
   const [totalBots, setTotalBots] = useState(0);
 
-  console.log("dashboardStats:", dashboardStats);
   useEffect(() => {
-    if (!dashboardStats) return;
-    setChangeData(dashboardStats.change);
-    settodayData(dashboardStats.todayStats);
-    setTotalBots(dashboardStats.totalBotsCount);
-  }, [dashboardStats]);
-  console.log(todayData);
+    settodayData(dummydata);
+    setChangeData(dummyChangeData);
+    setTotalBots(5);
+  }, []);
+
+  // console.log("dashboardStats:", dashboardStats);
+  // useEffect(() => {
+  //   if (!dashboardStats) return;
+  //   setChangeData(dashboardStats.change);
+  //   settodayData(dashboardStats.todayStats);
+  //   setTotalBots(dashboardStats.totalBotsCount);
+  // }, [dashboardStats]);
   return (
     <div className="grid grid-cols-2 gap-4 p-10 h-full">
       <div className="h-full flex flex-col gap-4">
