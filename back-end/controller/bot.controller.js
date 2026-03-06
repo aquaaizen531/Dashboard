@@ -506,7 +506,6 @@ module.exports.botsocket = (io, socket) => {
       ]);
 
       const result = stats[0] || {};
-      console.log(result.lastweekHistory)
       const todayStats = result.todayStatsAgg?.[0] || {};
       const yesterdayStats = result.yesterdayStatsAgg?.[0] || {};
       const change = {

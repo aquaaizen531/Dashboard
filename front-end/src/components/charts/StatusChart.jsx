@@ -71,7 +71,6 @@ const StatusChart = () => {
       { name: "idle", value: 0, fill: "#facc15" },
       { name: "active", value: 0, fill: "#22c55e" },
     ];
-
     dummyBots.forEach((bot) => {
       const status = bot.status.toLowerCase();
 
