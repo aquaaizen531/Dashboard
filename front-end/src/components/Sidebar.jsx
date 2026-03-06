@@ -89,7 +89,7 @@ export default function Sidebar({ role = "admin" }) {
       >
         <Compass className="w-8 h-8 flex-shrink-0" />
         {!isCollapsed && (
-          <span className="text-lg font-bold tracking-wide">SCOUT V12</span>
+          <span className="text-lg font-bold tracking-wide">drubelabs.</span>
         )}
       </div>
 
@@ -164,9 +164,9 @@ export default function Sidebar({ role = "admin" }) {
             style={{ color: "var(--secondary-text-color)" }}
           >
             <strong style={{ color: "var(--primary-text-color)" }}>
-              DRube-Labs
+              drubelabs.
             </strong>{" "}
-            © 2024
+            © 2026
           </p>
           <p
             className="text-xs text-center mt-1"
