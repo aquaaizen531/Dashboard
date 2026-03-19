@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import React, { createContext, useEffect, useState, useContext } from "react";
 import axios from "../config/axios.config";
 import socket from "../config/socket";
@@ -35,7 +37,6 @@ export const BotProvider = ({ children }) => {
       socket.off("connect");
     };
   }, []);
-  console.log(botData);
 
   return (
     <BotContext.Provider

@@ -38,17 +38,11 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true
     }
-    // UserId: {
-    //   type: String,
-    //   required: true
-    // }
   },
   { timestamps: true }
 );
 userSchema.pre("save", async function (next) {
-  console.log("pre-save middleware triggered");
   if (!this.isModified("password")) {
-    console.log("no changes ditected");
     return next();
   }
   try {

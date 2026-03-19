@@ -11,7 +11,9 @@ const userModel = require("./model/user.model");
 const { botsocket } = require("./controller/bot.controller");
 const http = require("http");
 const { Server } = require("socket.io");
-const allowedOrigins = process.env.BASE_URL.split(",");
+const allowedOrigins = process.env.BASE_URL.split(",").map((origin) =>
+  origin.trim(),
+);
 
 const app = express();
 app.use(
@@ -75,5 +77,3 @@ io.on("connection", async (socket) => {
 server.listen(process.env.PORT, (err) => {
   console.log("server is running");
 });
-
-

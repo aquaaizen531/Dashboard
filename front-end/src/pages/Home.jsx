@@ -1,9 +1,9 @@
 import React from "react";
-import "../css/Bg.css";
-import "../css/Home.css";
-import Header from "../components/Header";
+import "@/css/Bg.css";
+import "@/css/Home.css";
+import Header from "@/features/custom/components/Header";
 import { Outlet, useLocation } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "@/features/custom/components/Sidebar";
 const Home = () => {
   const location = useLocation();
   const currentsection = (path) => {

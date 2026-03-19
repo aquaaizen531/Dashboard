@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/Bg.css";
 import "../css/login.css";
-import loginbg from "../assets/bg/login_cover.png";
 import logo from "../assets/logo/drubelabs.png";
 import { toast } from "react-toastify";
 import axios from "../config/axios.config";
 import { useUserDetails } from "../context/UserContext";
+import { Card } from "@/components/ui/card";
 
 const Login = () => {
   const { setuserDetails } = useUserDetails();
@@ -82,106 +82,80 @@ const Login = () => {
       });
   };
   return (
-    <div>
-      <div
-        className=" min-h-screen w-screen relative bg-cover bg-center bg-[#ffffff] "
-        // style={{ backgroundImage: `url(${loginbg})` }}
-      >
-        <div className="bg-amber-50">
-          <a
-            href="https://drubelabs.com/"
-            className=" no-underline hover:text-red-500 text-md sm:text-2xl md:text-3xl lg:text-5xl w-fit"
+    <div className=" min-h-screen w-screen relative bg-cover bg-center bg-[#ffffff] ">
+      <div className="bg-amber-50">
+        <a
+          href="https://drubelabs.com/"
+          className=" no-underline text-md sm:text-2xl md:text-3xl lg:text-5xl w-fit"
+        >
+          <img
+            src={logo}
+            alt="D-RubeLabs"
+            className="absolute h-[20px] md:h-[40px] m-1 md:m-5 "
+          />
+        </a>
+      </div>
+      <div className="relative z-10 flex items-center justify-center w-full h-screen  ">
+        <Card className="flex flex-col gap-5 justify-center items-center ">
+          <h3 className=" text-lg sm:text-xl md:text-2xl lg:text-4xl font-[700] font-[Poppins] ">
+            Sign In
+          </h3>
+          <form
+            noValidate
+            className=" pr-5 sm:pr-7 md:pr-10 lg:pr-20 pl-5 sm:pl-7 md:pl-10 lg:pl-20 input-parent"
+            onSubmit={handleSubmit}
           >
-            <img
-              src={logo}
-              alt="D-RubeLabs"
-              className="absolute h-[20px] md:h-[40px] m-1 md:m-5 "
-            />
-          </a>
-        </div>
-        <div className="relative z-10 flex items-center justify-center w-full h-screen  ">
-          <div className="bg-[#111419] w-[80%] h-[70%] lg:h-[80%] rounded-xl parent shadow-2xl border-0 overflow-hidden ">
-            <div
-              className="relative h-full hide-mobile w-[40%] sm:w-[45%] md:w-[50%] lg:w-[60%] rounded--xl bg-cover"
-              style={{
-                backgroundImage: `url(${loginbg})`,
-                backgroundSize: "130%",
-                backgroundPosition: " center",
-              }}
+            <div className="mb-2">
+              <label htmlFor="email" className="">
+                E-mail
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your Email"
+                required
+                className="input-box mt-2 mb-1 border"
+                value={formvalue.email}
+                onChange={handleChange}
+              />
+              {err.email && (
+                <p className="text-red-500 text-xs">{err.email}</p>
+              )}
+            </div>
+            <div className="mb-2">
+              <label htmlFor="password" className="">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your Password"
+                required
+                className="input-box mt-2 mb-1 border"
+                value={formvalue.password}
+                onChange={handleChange}
+              />
+              {err.password && (
+                <p className="text-red-500 text-xs">{err.password}</p>
+              )}
+            </div>
+            <div className="flex justify-end mb-3 text-blue-500 cursor-pointer text-sm hover:underline">
+              <span className="relative right-0 text-[8px] md:text-xs lg:text-sm">
+                Forgot Password
+              </span>
+            </div>
+            <button
+              className={`login-btn border my-2 hover:bg-gray-300 ${
+                submitted ? "disabled cursor-not-allowed bg-[#0843e693]!" : ""
+              }`}
+              type="submit"
             >
-              <a
-                href="https://drubelabs.com/"
-                className=" no-underline hover:text-red-500 text-md sm:text-2xl md:text-3xl lg:text-5xl w-fit"
-              >
-                <p className="text-black text-2xl m-5 font-[700] font-[Poppins] ">
-                  SCOUT E750
-                </p>
-              </a>
-            </div>
-            <div className=" child-b w-[60%] sm:w-[55%] md:w-[50%] lg:w-[40%] flext-1 text-white flex flex-col gap-5 justify-center items-center ">
-              <h3 className=" text-lg sm:text-xl md:text-2xl lg:text-4xl font-[700] font-[Poppins] ">
-                Sign In
-              </h3>
-              <form
-                noValidate
-                className=" pr-5 sm:pr-7 md:pr-10 lg:pr-20 pl-5 sm:pl-7 md:pl-10 lg:pl-20 input-parent"
-                onSubmit={handleSubmit}
-              >
-                <div className="mb-2">
-                  <label htmlFor="email" className="inpt-label">
-                    E-mail
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your Email"
-                    required
-                    className="input-box"
-                    value={formvalue.email}
-                    onChange={handleChange}
-                  />
-                  {err.email && (
-                    <p className="text-red-500 text-sm mt-1">{err.email}</p>
-                  )}
-                </div>
-                <div className="mb-2">
-                  <label htmlFor="password" className="inpt-label">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your Password"
-                    required
-                    className="input-box"
-                    value={formvalue.password}
-                    onChange={handleChange}
-                  />
-                  {err.password && (
-                    <p className="text-red-500 text-sm mt-1">{err.password}</p>
-                  )}
-                </div>
-                <div className="flex justify-end mb-2 text-[#f5f5f5] cursor-pointer text-sm hover:underline">
-                  <span className="relative right-0 text-[10px] sm:text-xs md:text-sm lg:text-base">
-                    Forgot Password
-                  </span>
-                </div>
-                <button
-                  className={`login-btn ${
-                    submitted
-                      ? "disabled cursor-not-allowed !bg-[#0843e693]"
-                      : ""
-                  }`}
-                  type="submit"
-                >
-                  Sign in
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
+              Sign in
+            </button>
+          </form>
+        </Card>
       </div>
     </div>
   );

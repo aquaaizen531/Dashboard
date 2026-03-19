@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "../config/axios.config";
 import { useNavigate } from "react-router-dom";

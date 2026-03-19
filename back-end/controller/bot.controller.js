@@ -534,7 +534,6 @@ module.exports.botsocket = (io, socket) => {
   sendBotData(socket);
   dashboardStats(socket);
   botModel.watch().on("change", async () => {
-    console.log("Bot data Changed");
     sendBotData(io);
   });
   socket.on("initDashboard", async () => {
@@ -550,7 +549,7 @@ module.exports.botsocket = (io, socket) => {
     );
   }
   socket.on("disconnect", () => {
-    console.log("user disconnected", socket.id);
+    console.log("user disconnected");
     if (intervalId) {
       clearInterval(intervalId);
       intervalId = null;
