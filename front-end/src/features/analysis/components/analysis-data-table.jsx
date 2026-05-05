@@ -1,7 +1,6 @@
 import {
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { DataTable } from "@/components/custom/data-table";
@@ -10,10 +9,10 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "@/config/axios.config";
 import { Filter } from "@/components/custom/filter";
 import FileDownload from "@/features/custom/components/excel-pdf-download";
+import { toast } from "sonner";
 
 export function AnalysisTable({ columns }) {
   const [analysisData, setAnalysisData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
     role: "",
     startDate: null,
@@ -21,61 +20,57 @@ export function AnalysisTable({ columns }) {
     endDate: null,
     endTime: "",
   });
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [total, setTotal] = useState(0);
   useEffect(() => {
+    if (
+      (filters.startTime && !filters.startDate) ||
+      (filters.endTime && !filters.endDate)
+    ) {
+      toast.error("Please select start date and end date to apply time filter");
+      return;
+    }
+    const startDateTime = filters.startDate ? new Date(filters.startDate) : null;
+    if (filters.startTime && startDateTime) {
+      const [startHours, startMinutes] = filters.startTime.split(":");
+      startDateTime.setHours(startHours, startMinutes);
+    }
+    const endDateTime = filters.endDate ? new Date(filters.endDate) : null;
+    if (filters.endTime && endDateTime) {
+      const [endHours, endMinutes] = filters.endTime.split(":");
+      endDateTime.setHours(endHours, endMinutes);
+    }
     axios
-      .get("/get-bot-analysis")
+      .get("/get-bot-analysis", {
+        params: {
+          page: pagination.pageIndex + 1,
+          limit: pagination.pageSize,
+          role: filters.role,
+          startDate: startDateTime?.toISOString(),
+          endDate: endDateTime?.toISOString(),
+          startTime: filters.startTime,
+          endTime: filters.endTime,
+        },
+      })
       .then((res) => {
         setAnalysisData(res.data?.bots);
+        setTotal(res.data?.total || 0);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, []);
-  useEffect(() => {
-    let filteredData = analysisData;
-    if (filters.role.length > 0) {
-      filteredData = filteredData.filter(
-        (bot) => bot.operatorRole?.toLowerCase() === filters.role.toLowerCase(),
-      );
-    }
-    if (filters.startDate) {
-      if (filters.startDate) {
-        filteredData = filteredData.filter(
-          (bot) => new Date(bot.time) >= filters.startDate,
-        );
-      }
-      if (filters.endDate) {
-        filteredData = filteredData.filter(
-          (bot) => new Date(bot.time) <= filters.endDate,
-        );
-      }
-    }
-    if (filters.startTime) {
-      filteredData = filteredData.filter((bot) => {
-        const botTime = new Date(bot.time).toTimeString().slice(0, 5);
-        return botTime >= filters.startTime;
-      });
-    }
-    if (filters.endDate) {
-      filteredData = filteredData.filter(
-        (bot) =>
-          filters.endDate.toLocaleDateString() >=
-          new Date(bot.time).toLocaleDateString(),
-      );
-    }
-    if (filters.endTime) {
-      filteredData = filteredData.filter((bot) => {
-        const botTime = new Date(bot.time).toTimeString().slice(0, 5);
-        return botTime <= filters.endTime;
-      });
-    }
-    setFilteredData(filteredData);
-  }, [filters, analysisData]);
+  }, [pagination, filters]);
   const table = useReactTable({
-    data: filteredData ?? [],
+    data: analysisData ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    state: { pagination },
+    onPaginationChange: setPagination,
+    pageCount: Math.ceil(total / pagination.pageSize),
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, _, filterValue) => {
       const search = filterValue.toLowerCase();
@@ -97,7 +92,7 @@ export function AnalysisTable({ columns }) {
   });
   const fileData = useMemo(() => {
     return {
-      tabledata: filteredData.map((bot) => [
+      tabledata: analysisData?.map((bot) => [
         bot.UniqueCode,
         bot.botName,
         bot.location,
@@ -129,7 +124,7 @@ export function AnalysisTable({ columns }) {
         5: { cellWidth: 30 },
       },
     };
-  }, [filteredData]);
+  }, [analysisData]);
   return (
     <div className="flex flex-col gap-2">
       <div className="flex pb-2 gap-2">

@@ -30,10 +30,7 @@ export function Filter({ filters, setFilters }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className="rounded-sm text-black"
-        asChild
-      >
+      <DropdownMenuTrigger className="rounded-sm text-black" asChild>
         <Button variant="outline">Filter</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -128,6 +125,7 @@ export function Filter({ filters, setFilters }) {
                           }
                           id="time-picker-optional"
                           step="1"
+                          disabled={!startDate}
                           className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                         />
                       </Field>
@@ -200,6 +198,7 @@ export function Filter({ filters, setFilters }) {
                           }
                           id="time-picker-optional"
                           step="1"
+                          disabled={!endDate}
                           className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                         />
                       </Field>

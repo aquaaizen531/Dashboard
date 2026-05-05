@@ -11,9 +11,14 @@ const userModel = require("./model/user.model");
 const { botsocket } = require("./controller/bot.controller");
 const http = require("http");
 const { Server } = require("socket.io");
-const allowedOrigins = process.env.BASE_URL.split(",").map((origin) =>
-  origin.trim(),
-);
+// const allowedOrigins = process.env.BASE_URL
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  process.env.BASE_URL,
+].filter(Boolean);
 
 const app = express();
 app.use(
@@ -23,6 +28,14 @@ app.use(
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
+// const app = express();
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       // allow REST tools, mobile apps, etc.
+//       if (!origin) return callback(null, true);
+
+//       if (origin === process.env.BASE_URL) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -32,13 +45,13 @@ app.use(
   }),
 );
 
-// app.use(cors({ origin: "https://dashboard-henna-nu-36.vercel.app", credentials: true }));
-
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(userRoutes);
-app.use(botRoutes);
+app.use("/api", userRoutes);
+app.use("/api", botRoutes);
+// app.use(userRoutes);
+// app.use(botRoutes);
 
 dbconnect();
 const server = http.createServer(app);

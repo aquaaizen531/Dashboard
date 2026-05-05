@@ -7,14 +7,14 @@ module.exports.logout = async (req, res) => {
     res.clearCookie("authToken", {
       httpOnly: true,
       secure: true,
-      sameSite: "none"
+      sameSite: "none",
     });
     await userModel.updateOne({ _id: id }, { activityStatus: false });
     await userLogModel.updateOne(
       { user: id },
       {
-        $push: { actions: { action: "log out", details: "logged Out" } }
-      }
+        $push: { actions: { action: "log out", details: "logged Out" } },
+      },
     );
     res.status(200).json({ message: "User logged out successfully" });
   } catch (error) {
@@ -23,13 +23,55 @@ module.exports.logout = async (req, res) => {
 };
 module.exports.getLogs = async (req, res) => {
   try {
-    const logs = await userLogModel
-      .find()
-      .populate("user", "name email phone role location activityStatus");
-    if (logs.length === 0) {
-      res.status(404).json({ message: "no logs found" });
-    }
-    res.status(200).json({ message: "logs found", logs: logs });
+    let { page = 1, limit = 10 } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const skip = (page - 1) * limit;
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      { $unwind: "$actions" },
+      {
+        $project: {
+          logId: "$_id",
+          name: "$user.name",
+          email: "$user.email",
+          action: "$actions.action",
+          details: "$actions.details",
+          time: "$actions.createdAt",
+        },
+      },
+
+      { $sort: { time: -1 } },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+    ];
+
+    const result = await userLogModel.aggregate(pipeline);
+
+    const logs = result[0]?.data || [];
+    const total = result[0]?.metadata[0]?.total || 0;
+
+    res.status(200).json({
+      logs,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

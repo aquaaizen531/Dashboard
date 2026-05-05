@@ -7,38 +7,39 @@ import axios from "@/config/axios.config";
 import {
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import FileDownload from "@/features/custom/components/excel-pdf-download";
 
 const LogDataTable = ({ columns }) => {
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [total, setTotal] = useState(0);
   const [logs, setlogs] = useState([]);
   useEffect(() => {
-    axios.get("/getlogs").then((res) => {
-      setlogs(res.data.logs);
-    });
-  }, []);
+    axios
+      .get("/getlogs", {
+        params: {
+          page: pagination.pageIndex + 1,
+          limit: pagination.pageSize,
+        },
+      })
+      .then((res) => {
+        setlogs(res.data.logs);
+        setTotal(res.data.total);
+      });
+  }, [pagination]);
 
-  const flattenedLogs = useMemo(() => {
-    return logs
-      .flatMap((log) =>
-        log.actions.map((action) => ({
-          logId: log?._id,
-          name: log?.user?.name,
-          email: log?.user?.email,
-          action: action?.action,
-          details: action?.details,
-          time: action?.createdAt,
-        })),
-      )
-      .sort((a, b) => new Date(b.time) - new Date(a.time));
-  }, [logs]);
   const table = useReactTable({
-    data: flattenedLogs,
+    data: logs,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    state: { pagination },
+    onPaginationChange: setPagination,
+    pageCount: Math.ceil(total / pagination.pageSize),
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, _, filterValue) => {
       const search = filterValue.toLowerCase();
@@ -51,7 +52,7 @@ const LogDataTable = ({ columns }) => {
   });
   const fileData = useMemo(() => {
     return {
-      tabledata: flattenedLogs.map((log) => [
+      tabledata: logs.map((log) => [
         log.name,
         log.email,
         log.action,
@@ -74,7 +75,7 @@ const LogDataTable = ({ columns }) => {
         4: { cellWidth: 35 },
       },
     };
-  }, [flattenedLogs]);
+  }, [logs]);
   return (
     <div className="flex flex-col gap-2">
       <div className="flex pb-2 gap-2">

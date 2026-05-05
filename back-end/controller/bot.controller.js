@@ -19,30 +19,50 @@ module.exports.getbots = async (req, res) => {
 
 module.exports.getBotAnalysis = async (req, res) => {
   try {
-    const botAnalysis = await botHistoryModel.aggregate([
+    let {
+      page = 1,
+      limit = 10,
+      role,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+    } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const skip = (page - 1) * limit;
+
+    // Build match conditions
+    const matchConditions = {};
+
+    // Date range filter
+    const dateFilter = {};
+    if (startDate) {
+      dateFilter.$gte = new Date(startDate);
+    }
+    if (endDate) {
+      dateFilter.$lte = new Date(endDate);
+    }
+
+    // Apply date filter only if dates are provided
+    if (Object.keys(dateFilter).length > 0) {
+      matchConditions["data.date"] = dateFilter;
+    }
+
+    // Time filter
+    const timeFilter = {};
+    if (startTime) {
+      timeFilter.$gte = startTime;
+    }
+    if (endTime) {
+      timeFilter.$lte = endTime;
+    }
+
+    const result = await botHistoryModel.aggregate([
       {
         $unwind: "$data",
-      },
-      {
-        $match: {
-          $expr: {
-            $gte: [
-              "$data.date",
-              {
-                $dateSubtract: {
-                  startDate: "$$NOW",
-                  unit: "day",
-                  amount: 30,
-                },
-              },
-            ],
-          },
-        },
-      },
-      {
-        $sort: {
-          "data.date": -1,
-        },
       },
       {
         $lookup: {
@@ -56,6 +76,35 @@ module.exports.getBotAnalysis = async (req, res) => {
         $unwind: {
           path: "$operatorDetails",
           preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          ...matchConditions,
+          ...(role && { "operatorDetails.role": { $regex: role, $options: "i" } }),
+          ...(Object.keys(timeFilter).length > 0 && {
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    { $substr: [{ $toString: "$data.date" }, 11, 5] },
+                    timeFilter.$gte || "00:00",
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substr: [{ $toString: "$data.date" }, 11, 5] },
+                    timeFilter.$lte || "23:59",
+                  ],
+                },
+              ],
+            },
+          }),
+        },
+      },
+      {
+        $sort: {
+          "data.date": -1,
         },
       },
       {
@@ -94,12 +143,31 @@ module.exports.getBotAnalysis = async (req, res) => {
           location: "$data.position.city",
         },
       },
-      { $sort: { time: -1 } },
+      {
+        $facet: {
+          data: [{ $sort: { time: -1 } }, { $skip: skip }, { $limit: limit }],
+          total: [{ $count: "total" }],
+        },
+      },
     ]);
+
+    const botAnalysis = result[0]?.data || [];
+    const total = result[0]?.total[0]?.total || 0;
+
     if (botAnalysis.length > 0) {
-      res.status(200).json({ message: "bots found", bots: botAnalysis });
+      res.status(200).json({
+        message: "bots found",
+        bots: botAnalysis,
+        total: total,
+        pagination: {
+          currentPage: page,
+          pageSize: limit,
+          total: total,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
     } else {
-      res.status(401).json({ message: "no bot found" });
+      res.status(200).json({ message: "no bot found", bots: [], total: 0 });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

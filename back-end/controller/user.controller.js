@@ -20,22 +20,22 @@ module.exports.login = async (req, res) => {
     const token = jwt.sign(
       {
         id: user.id,
-        email: user.email
+        email: user.email,
       },
       secret,
-      { expiresIn: "12h" }
+      { expiresIn: "12h" },
     );
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true, // use after hosting and making the api https
-      sameSite: "none",
-      maxAge: 12 * 60 * 60 * 1000
+      secure: false, // use after hosting and making the api https
+      sameSite: "lax", // after making https make it none
+      maxAge: 12 * 60 * 60 * 1000,
     });
     const userLog = await userLogModel.findOne({ user: user.id });
     if (userLog) {
       await userLogModel.updateOne(
         { user: user._id },
-        { $push: { actions: { action: "login", details: `logged in` } } }
+        { $push: { actions: { action: "login", details: `logged in` } } },
       );
     } else {
       await userLogModel.create({
@@ -43,9 +43,9 @@ module.exports.login = async (req, res) => {
         actions: [
           {
             action: "login",
-            details: "logged in"
-          }
-        ]
+            details: "logged in",
+          },
+        ],
       });
     }
     await userModel.updateOne({ email: email }, { activityStatus: true });
@@ -57,8 +57,8 @@ module.exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
         phone: user.phone,
-        location: user.location
-      }
+        location: user.location,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -90,7 +90,19 @@ module.exports.presence = async (req, res) => {
 };
 module.exports.getUsers = async (req, res) => {
   try {
-    const users = await userModel.find().select("-password");
+    let { page = 1, limit = 10 } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const skip = (page - 1) * limit;
+
+    const total = await userModel.countDocuments();
+    const users = await userModel
+      .find()
+      .select("-password")
+      .skip(skip)
+      .limit(limit);
     if (users.length === 0) {
       res.status(401).json({ message: "couldn't find any users" });
     } else {
@@ -101,10 +113,16 @@ module.exports.getUsers = async (req, res) => {
           ...obj,
           online: obj.lastseen
             ? now - new Date(obj.lastseen).getTime() < 40000
-            : false
+            : false,
         };
       });
-      res.status(200).json({ message: "users found", data: udata });
+      res.status(200).json({
+        message: "users found",
+        data: udata,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -135,11 +153,11 @@ module.exports.adduser = async (req, res) => {
                 details: `Created user: name=${userWithoutPass.name},
                  email=${userWithoutPass.email},
                   role=${userWithoutPass.role},
-                   status=${userWithoutPass.activityStatus}`
-              }
-            ]
-          }
-        }
+                   status=${userWithoutPass.activityStatus}`,
+              },
+            ],
+          },
+        },
       );
     } else {
       await userLogModel.create({
@@ -150,15 +168,15 @@ module.exports.adduser = async (req, res) => {
             details: `Created user: name=${userWithoutPass.name},
                  email=${userWithoutPass.email},
                   role=${userWithoutPass.role},
-                   status=${userWithoutPass.activityStatus}`
-          }
-        ]
+                   status=${userWithoutPass.activityStatus}`,
+          },
+        ],
       });
     }
     res.status(200).json({
       message: "new user created",
       users: allUsers,
-      pass: plainPassword
+      pass: plainPassword,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -175,7 +193,7 @@ module.exports.edituser = async (req, res) => {
       password: data.password,
       location: data.location,
       role: data.role,
-      activityStatus: data.activityStatus
+      activityStatus: data.activityStatus,
     };
     const existingUser = await userModel.findById(id);
     let plainPassword = "";
@@ -197,7 +215,7 @@ module.exports.edituser = async (req, res) => {
         if (edits[i] !== existingUser[i]) {
           changedFields[i] = {
             from: existingUser[i],
-            to: edits[i]
+            to: edits[i],
           };
         }
       }
@@ -215,11 +233,11 @@ module.exports.edituser = async (req, res) => {
               actions: [
                 {
                   action: "updated a user",
-                  details: `${existingUser.email} updated with changes: ${logDetails}`
-                }
-              ]
-            }
-          }
+                  details: `${existingUser.email} updated with changes: ${logDetails}`,
+                },
+              ],
+            },
+          },
         );
       } else {
         await userLogModel.create({
@@ -227,14 +245,14 @@ module.exports.edituser = async (req, res) => {
           actions: [
             {
               action: "updated a user",
-              details: `${existingUser.email} updated with changes: ${logDetails}`
-            }
-          ]
+              details: `${existingUser.email} updated with changes: ${logDetails}`,
+            },
+          ],
         });
       }
       res.status(200).json({
         message: "User updated successfully!",
-        users: allUsers
+        users: allUsers,
       });
     }
   } catch (error) {
@@ -249,7 +267,7 @@ module.exports.profileupdate = async (req, res) => {
       name: data.name,
       email: data.email,
       phone: data.phone,
-      password: data.password
+      password: data.password,
     };
     let plainPassword = "";
     if (data.password && data.password.trim() !== "") {
@@ -267,7 +285,7 @@ module.exports.profileupdate = async (req, res) => {
         if (i !== "password") {
           changedFields[i] = {
             from: existingUser[i],
-            to: update[i]
+            to: update[i],
           };
         }
       }
@@ -290,11 +308,11 @@ module.exports.profileupdate = async (req, res) => {
               actions: [
                 {
                   action: "updated Profile",
-                  details: `${existingUser.email} updated with changes: ${logDetails}`
-                }
-              ]
-            }
-          }
+                  details: `${existingUser.email} updated with changes: ${logDetails}`,
+                },
+              ],
+            },
+          },
         );
       } else {
         await userLogModel.create({
@@ -302,13 +320,13 @@ module.exports.profileupdate = async (req, res) => {
           actions: [
             {
               action: "updated a user",
-              details: `${existingUser.email} updated with changes: ${logDetails}`
-            }
-          ]
+              details: `${existingUser.email} updated with changes: ${logDetails}`,
+            },
+          ],
         });
       }
       res.status(200).json({
-        message: "Profile updated successfully!"
+        message: "Profile updated successfully!",
       });
     }
   } catch (error) {
@@ -333,10 +351,10 @@ module.exports.deleteUser = async (req, res) => {
               details: `Created user: name=${existingUserWithoutPass.name},
                email=${existingUserWithoutPass.email},
                 role=${existingUserWithoutPass.role},
-                status=${existingUserWithoutPass.activityStatus}`
-            }
-          }
-        }
+                status=${existingUserWithoutPass.activityStatus}`,
+            },
+          },
+        },
       );
     } else {
       await userLogModel.create({
@@ -347,9 +365,9 @@ module.exports.deleteUser = async (req, res) => {
             details: `Deleted user: name=${existingUserWithoutPass.name},
              email=${existingUserWithoutPass.email},
               role=${existingUserWithoutPass.role},
-               status=${existingUserWithoutPass.activityStatus}`
-          }
-        ]
+               status=${existingUserWithoutPass.activityStatus}`,
+          },
+        ],
       });
     }
     res
@@ -366,8 +384,27 @@ module.exports.getpass = async (req, res) => {
     if (user.role !== "admin") {
       res.status(401).json({ message: "UnAuthorised" });
     } else {
-      const pass = await passmodel.find().populate().select("-password");
-      res.status(200).json({ message: "success", data: pass });
+      let { page = 1, limit = 10 } = req.query;
+
+      page = parseInt(page);
+      limit = parseInt(limit);
+
+      const skip = (page - 1) * limit;
+
+      const total = await passmodel.countDocuments();
+      const pass = await passmodel
+        .find()
+        .populate()
+        .select("-password")
+        .skip(skip)
+        .limit(limit);
+      res.status(200).json({
+        message: "success",
+        data: pass,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
     }
   } catch (error) {
     console.log(error);

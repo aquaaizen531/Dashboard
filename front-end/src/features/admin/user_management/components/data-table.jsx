@@ -3,7 +3,6 @@ import axios from "@/config/axios.config";
 import {
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { DataTable } from "@/components/custom/data-table";
@@ -33,20 +32,36 @@ export function UserDataTable({ columns }) {
   const [userRole, setuserRole] = useState("");
   const [activityStatus, setactivityStatus] = useState(null);
   const [pass, setpass] = useState([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [total, setTotal] = useState(0);
   useEffect(() => {
     const fetchdata = () => {
       axios
-        .get("/getusers")
+        .get("/getusers", {
+          params: {
+            page: pagination.pageIndex + 1,
+            limit: pagination.pageSize,
+          },
+        })
         .then((res) => {
-          console.log(res);
           setUsers(res.data.data || []);
+          setTotal(res.data.total || 0);
         })
         .catch((err) => {
           console.log(err);
           setUsers([]);
+          setTotal(0);
         });
       axios
-        .get("/pass")
+        .get("/pass", {
+          params: {
+            page: pagination.pageIndex + 1,
+            limit: pagination.pageSize,
+          },
+        })
         .then((res) => {
           setpass(res.data.data || []);
         })
@@ -60,7 +75,7 @@ export function UserDataTable({ columns }) {
       fetchdata();
     }, 20000);
     return () => clearInterval(interval);
-  }, [isEdit, activityStatus, setUsers]);
+  }, [isEdit, activityStatus, setUsers, pagination]);
 
   useEffect(() => {
     const handleFilter = () => {
@@ -106,7 +121,10 @@ export function UserDataTable({ columns }) {
     data: filteredUsers,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    state: { pagination },
+    onPaginationChange: setPagination,
+    pageCount: Math.ceil(total / pagination.pageSize),
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, _, filterValue) => {
       const search = filterValue.toLowerCase();
